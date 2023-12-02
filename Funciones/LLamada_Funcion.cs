@@ -1,13 +1,16 @@
-namespace Hulk;
-class LLamada_Funcion : Expresion
+namespace GEOWALL_E
 {
-    public LLamada_Funcion(string nombre, List<Expresion> parametros)
+    class LLamada_Funcion : Expresion
     {
-        Nombre = nombre;
-        Parametros = parametros;
+        public LLamada_Funcion(string nombre, List<Expresion> parametros)
+        {
+            Nombre = nombre;
+            Parametros = parametros;
+        }
+
+        public override Tipo_De_Token Tipo => Tipo_De_Token.LLamada_Funcion;
+        public string Nombre { get; }
+        public List<Expresion> Parametros { get; }
     }
 
-    public override Tipo_De_Token Tipo => Tipo_De_Token.LLamada_Funcion;
-    public string Nombre { get; }
-    public List<Expresion> Parametros { get; }
 }

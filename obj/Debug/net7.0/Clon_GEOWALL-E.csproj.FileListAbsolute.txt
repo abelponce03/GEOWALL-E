@@ -1,0 +1,14 @@
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\bin\Debug\net7.0\Clon_GEOWALL-E.exe
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\bin\Debug\net7.0\Clon_GEOWALL-E.deps.json
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\bin\Debug\net7.0\Clon_GEOWALL-E.runtimeconfig.json
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\bin\Debug\net7.0\Clon_GEOWALL-E.dll
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\bin\Debug\net7.0\Clon_GEOWALL-E.pdb
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.AssemblyInfoInputs.cache
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.AssemblyInfo.cs
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.csproj.CoreCompileInputs.cache
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.dll
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\refint\Clon_GEOWALL-E.dll
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.pdb
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\Clon_GEOWALL-E.genruntimeconfig.cache
+C:\Users\abelp\OneDrive\Desktop\Clon_GEOWALL-E\obj\Debug\net7.0\ref\Clon_GEOWALL-E.dll

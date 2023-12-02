@@ -1,5 +1,7 @@
-namespace Hulk;
-abstract class Nodo
+namespace GEOWALL_E
 {
-    public abstract Tipo_De_Token Tipo { get; }
+    abstract class Nodo
+    {
+        public abstract Tipo_De_Token Tipo { get; }
+    }
 }

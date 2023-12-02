@@ -1,5 +1,8 @@
-namespace Hulk;
-abstract class Expresion : Nodo
+namespace GEOWALL_E
 {
+    abstract class Expresion : Nodo
+    {
 
+    }
 }
+
