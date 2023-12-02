@@ -1,15 +1,17 @@
 
-namespace Hulk;
-class Circle: Expresion
+namespace GEOWALL_E
 {
-    public Circle(string identificador, Expresion punto, object radio)
+    class Circle : Expresion
     {
-        Identificador = identificador;
-        Punto = punto;
-        Radio = radio; 
+        public Circle(string identificador, Expresion punto, object radio)
+        {
+            Identificador = identificador;
+            Punto = punto;
+            Radio = radio;
+        }
+        public override Tipo_De_Token Tipo => Tipo_De_Token.circle_Expresion;
+        public string Identificador { get; }
+        public Expresion Punto { get; }
+        public object Radio { get; }
     }
-    public override Tipo_De_Token Tipo => Tipo_De_Token.circle_Expresion;
-    public string Identificador {get;}
-    public Expresion Punto {get;}
-    public object Radio {get;}
 }
