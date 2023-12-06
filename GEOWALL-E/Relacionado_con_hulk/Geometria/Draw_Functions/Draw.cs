@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions
 {
-    internal class Dibujar : Expresion, ILugarGeometrico
+    internal class Dibujar : Expresion 
     {
         public Expresion _Expresion { get; }
         public Dibujar( Expresion expresion)

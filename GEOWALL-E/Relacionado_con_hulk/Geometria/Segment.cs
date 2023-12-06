@@ -6,27 +6,15 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E
 {
-    class Segment : Expresion, ILugarGeometrico  //representa un segmento
+    class Segment : Expresion  //representa un segmento
     {
         public Segment(Punto p1, Punto p2)
         {
             P1 = p1;
             P2 = p2;
         }
-        public Segment(string identificador, Punto p1, Punto p2)
-        {
-            Identificador = identificador;
-            P1 = p1;
-            P2 = p2;
-        }
         public Segment(Expresion p1, Expresion p2)
         {
-            P1 = p1;
-            P2 = p2;
-        }
-        public Segment(string identificador, Expresion p1, Expresion p2)
-        {
-            Identificador = identificador;
             P1 = p1;
             P2 = p2;
         }
@@ -42,6 +30,5 @@ namespace GEOWALL_E
         public Expresion P1 { get; }
         public Expresion P2 { get; }
 
-        public void Draw() { }
     }
 }

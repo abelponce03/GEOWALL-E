@@ -370,8 +370,14 @@ namespace GEOWALL_E
                         Proximo_Token();
                         Match(Tipo_De_Token.Parentesis_Abierto);
                         var P1 = Parse_Expresion();
+
+                        if (P1.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                         Match(Tipo_De_Token.coma);
                         var P2 = Parse_Expresion();
+
+                        if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                         Match(Tipo_De_Token.Parentesis_Cerrado);
                         return new Measure(P1,P2);
                     }
@@ -381,26 +387,16 @@ namespace GEOWALL_E
                         Proximo_Token();
                         if(Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
-                            var identificador = Proximo_Token();
-                            if(Verificandose.Tipo == Tipo_De_Token.Parentesis_Abierto)
-                            {
-                                Proximo_Token();
-                                var centro = Parse_Expresion();
-                                Match(Tipo_De_Token.coma);
-                                var radio = Parse_Expresion();
-                                Match(Tipo_De_Token.Parentesis_Cerrado);
-                                return new Circle(identificador.Texto, centro, radio);
-                            }
-                            else
-                            {
-                                return new Circle(identificador.Texto);
-                            }
-
+                            var identificador = Proximo_Token();    
+                            return new Circle(identificador.Texto);
                         }
                         else
                         {
                             Match(Tipo_De_Token.Parentesis_Abierto);
                             var centro = Parse_Expresion();
+
+                            if (centro.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                             Match(Tipo_De_Token.coma);
                             var radio = Parse_Expresion();
                             Match(Tipo_De_Token.Parentesis_Cerrado);
@@ -414,27 +410,21 @@ namespace GEOWALL_E
                         if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();
-                            if (Verificandose.Tipo == Tipo_De_Token.Parentesis_Abierto)
-                            {
-                                Proximo_Token();
-                                var P1 = Parse_Expresion();
-                                Match(Tipo_De_Token.coma);
-                                var P2 = Parse_Expresion();
-                                Match(Tipo_De_Token.Parentesis_Cerrado);
-                                return new Segment(identificador.Texto, P1, P2);
-                            }
-                            else
-                            {
-                                return new Segment(identificador.Texto);
-                            }
-
+                            return new Segment(identificador.Texto);
                         }
                         else
                         {
                             Match(Tipo_De_Token.Parentesis_Abierto);
                             var P1 = Parse_Expresion();
+
+                            if (P1.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                             Match(Tipo_De_Token.coma);
+
                             var P2 = Parse_Expresion();
+
+                            if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                             Match(Tipo_De_Token.Parentesis_Cerrado);
                             return new Segment(P1, P2);
                         }
@@ -445,40 +435,74 @@ namespace GEOWALL_E
                         Proximo_Token();
                         if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
-                            var identificador = Proximo_Token();
-                            if (Verificandose.Tipo == Tipo_De_Token.Parentesis_Abierto)
-                            {
-                                Proximo_Token();
-                                var P1 = Parse_Expresion();
-                                Match(Tipo_De_Token.coma);
-                                var P2 = Parse_Expresion();
-                                Match(Tipo_De_Token.Parentesis_Cerrado);
-                                return new Segment(identificador.Texto, P1, P2);
-                            }
-                            else
-                            {
-                                return new Line(identificador.Texto);
-                            }
-
+                            var identificador = Proximo_Token();    
+                            return new Line(identificador.Texto);
                         }
                         else
                         {
                             Match(Tipo_De_Token.Parentesis_Abierto);
                             var P1 = Parse_Expresion();
+
+                            if (P1.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                             Match(Tipo_De_Token.coma);
                             var P2 = Parse_Expresion();
+
+                            if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
                             Match(Tipo_De_Token.Parentesis_Cerrado);
                             return new Line(P1, P2);
                         }
                     }
-                //case Tipo_De_Token.arc_Keyword:
-                //    {
+                case Tipo_De_Token.ray_Keyword:
+                    {
+                        Proximo_Token();
+                        if (Verificandose.Tipo == Tipo_De_Token.Identificador)
+                        {
+                            var identificador = Proximo_Token();
+                            return new Ray(identificador.Texto);
+                        }
+                        else
+                        {
+                            Match(Tipo_De_Token.Parentesis_Abierto);
+                            var P1 = Parse_Expresion();
 
-                //    }
-                //case Tipo_De_Token.ray_Keyword:
-                //    {
+                            if (P1.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
 
-                //    }
+                            Match(Tipo_De_Token.coma);
+                            var P2 = Parse_Expresion();
+
+                            if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
+                            Match(Tipo_De_Token.Parentesis_Cerrado);
+                            return new Ray(P1, P2);
+                        }
+                    }
+                case Tipo_De_Token.arc_Keyword:
+                    {
+                        Proximo_Token();
+
+                        Match(Tipo_De_Token.Parentesis_Abierto);
+                        var P1 = Parse_Expresion();
+
+                        if (P1.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
+                        Match(Tipo_De_Token.coma);
+                        var P2 = Parse_Expresion();
+
+                        if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
+                        Match(Tipo_De_Token.coma);
+                        var P3 = Parse_Expresion();
+
+                        if (P3.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
+
+                        Match(Tipo_De_Token.coma);
+                        var radio = Parse_Expresion();
+
+                        Match(Tipo_De_Token.Parentesis_Cerrado);
+                        return new Arc(P1, P2, P3, radio);
+                    }
 
                 default:
                     {

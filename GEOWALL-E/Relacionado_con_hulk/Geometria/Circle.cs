@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E
 {
-    class Circle: Expresion, ILugarGeometrico
+    class Circle: Expresion
     {
         public Circle(Punto centro, Measure radio)
         {
@@ -18,24 +18,12 @@ namespace GEOWALL_E
             Centro = centro;
             Radio = radio;
         }
-        public Circle(string identificador, Punto centro, Measure radio)
-        {
-            Identificador = identificador;
-            Centro = centro;
-            Radio = radio;
-        }
-        public Circle(string identificador, Expresion centro, Expresion radio)
-        {
-            Identificador = identificador;
-            Centro = centro;
-            Radio = radio;
-        }
         public Circle (string identificador)
         {
             Identificador = identificador;
             Random rd = new Random();
-
             double radio = rd.Next(0, 400);
+
             Punto _punto = new Punto();
 
             Measure _measure = new Measure(radio);

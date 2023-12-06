@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E
 {
-    class Ray : Expresion, ILugarGeometrico  //representa una rayo
+    class Ray : Expresion  //representa una rayo
     {
         
         public Ray(Punto p1, Punto p2)
@@ -14,11 +14,11 @@ namespace GEOWALL_E
             P1 = p1;
             P2 = p2;
         }
-        public Ray(string identificador, Expresion p1, Expresion p2)    
+        public Ray(string identificador)    
         { 
             Identificador = identificador;
-            P1 = p1;
-            P2 = p2;
+            P1 = new Punto();
+            P2 = new Punto();
         }
         public Ray(Expresion p1, Expresion p2)
         {
@@ -30,6 +30,5 @@ namespace GEOWALL_E
         public Expresion P1 { get; }
         public Expresion P2 { get; }
 
-        public void Draw() { }
     }
 }

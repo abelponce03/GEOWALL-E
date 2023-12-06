@@ -1,9 +1,9 @@
 ﻿namespace GEOWALL_E
 {
-    class Punto: Expresion, ILugarGeometrico
+    class Punto: Expresion
     {
        
-        public Punto() // agregado por Abraham
+        public Punto() // agregado por Abraham // gran aporte ;)
         {
             Random rd = new Random();
             double componete_x = rd.Next(300, 900);
@@ -55,17 +55,5 @@
 
         public double valor_x { get; }
         public double valor_y { get; }
-
-        public void Draw() 
-        {
-            
-        }
-    }
-    public interface ILugarGeometrico 
-    { 
-        void Draw() 
-        {
-            
-        }
     }
 }

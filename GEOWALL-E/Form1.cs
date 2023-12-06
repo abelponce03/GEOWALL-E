@@ -40,7 +40,7 @@ namespace GEOWALL_E
 
         private void DRAW_Click(object sender, EventArgs h)
         {
-
+            Biblioteca.Limpiar();
             string Entrada = PANEL_COMANDOS.Text;
             if (Entrada != string.Empty)
             {
@@ -54,7 +54,6 @@ namespace GEOWALL_E
                     {
                         var e = new Evaluador(Arbol.Rama);
                         e.Evaluar();
-                        Biblioteca.Limpiar();
                     }
                     else
                     {

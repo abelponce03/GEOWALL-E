@@ -6,25 +6,28 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E
 {
-    class Arc : Expresion, ILugarGeometrico  //representa una arco de una circunferencia
+    class Arc : Expresion  //representa una arco de una circunferencia
     {
-        public Arc(Circle circle, Punto p1, Punto p2)
+        public Arc(Punto p1, Punto p2, Punto p3, Measure measure)
         {
-            Circle = circle;
-            InicialRay = new Ray(circle.Centro, p1);
-            FinalRay = new Ray(circle.Centro, p2);
             P1 = p1;
             P2 = p2;
-            Identificador = "Arc_" + p1.Identificador + p2.Identificador; // identificador por defecto
+            P3 = p3;
+            _Measure = measure;
         }
-        public override Tipo_De_Token Tipo => Tipo_De_Token.arc_Expresion;
-        public string Identificador { get; set; }
-        public Circle Circle { get; }
-        public Ray InicialRay { get; }
-        public Ray FinalRay { get; }
-        public Punto P1 { get; }
-        public Punto P2 { get; }
+        public Arc(Expresion p1, Expresion p2, Expresion p3, Expresion measure)
+        {
+            P1 = p1;
+            P2 = p2;
+            P3 = p3;
+            _Measure = measure;
+        }
 
-        public void Draw() { }
+        public override Tipo_De_Token Tipo => Tipo_De_Token.arc_Expresion;
+        public Expresion P1 { get; }
+        public Expresion P2 { get; }
+        public Expresion P3 { get; }
+
+        public Expresion _Measure { get; }
     }
 }

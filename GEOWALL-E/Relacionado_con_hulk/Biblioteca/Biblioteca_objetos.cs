@@ -12,8 +12,6 @@ namespace GEOWALL_E
 
         public static Dictionary<string, Punto> Puntos = new Dictionary<string, Punto>();
 
-        public static Dictionary<string, Arc> Arcos = new Dictionary<string, Arc>();
-
         public static Dictionary<string, Line> Lineas = new Dictionary<string, Line>();
 
         public static Dictionary<string, Circle> Circulos = new Dictionary<string, Circle>();
@@ -26,7 +24,6 @@ namespace GEOWALL_E
         {
             Variables.Clear();
             Puntos.Clear();
-            Arcos.Clear();
             Lineas.Clear();
             Circulos.Clear();
             Rayos.Clear();
