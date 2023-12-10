@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E
 {
-    class Segment : Expresion  //representa un segmento
+    class Segment : Expresion, ILugarGeometrico//representa un segmento
     {
         public Segment(Punto p1, Punto p2)
         {

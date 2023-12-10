@@ -78,6 +78,10 @@ namespace GEOWALL_E
 
                 case ')': return new Token(Tipo_De_Token.Parentesis_Cerrado, _posicion++, ")", null);
 
+                case '{': return new Token(Tipo_De_Token.Corchete_Abierto, _posicion++, "{", null);
+
+                case '}': return new Token(Tipo_De_Token.Corchete_Cerrado, _posicion++, "}", null);
+
                 case ',': return new Token(Tipo_De_Token.coma, _posicion++, ",", null);
 
                 case '&': return new Token(Tipo_De_Token.AmpersandAmpersand, _posicion++, "&", null);
@@ -91,6 +95,8 @@ namespace GEOWALL_E
                 case '\r': return new Token(Tipo_De_Token.salto_de_linea, _posicion++, "\r", null);
 
                 case '\n': return new Token(Tipo_De_Token.la_nada, _posicion++, "\n", null);
+
+                case '_' : return new Token(Tipo_De_Token.Identificador, _posicion++, "underscore", null); 
 
                 case ';':
                     {

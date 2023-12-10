@@ -1,19 +1,13 @@
 ﻿namespace GEOWALL_E
 {
-    class Punto: Expresion
+    class Punto: Expresion, ILugarGeometrico
     {
        
         public Punto() // agregado por Abraham // gran aporte ;)
         {
             Random rd = new Random();
-            double componete_x = rd.Next(300, 900);
-            double componente_y = rd.Next(200, 600);
-
-            Token x = new Token(Tipo_De_Token.Numero, 0, componete_x.ToString(), componete_x);
-            Token y = new Token(Tipo_De_Token.Numero, 0, componente_y.ToString(), componente_y);
-
-            Componente_x = new Literal(x, componete_x);
-            Componente_y = new Literal(y, componente_y);
+            valor_x = rd.Next(0, 1300);
+            valor_y = rd.Next(0, 880);
         }
         public Punto(string identificador) // constructor de punto para expression tipo "point p1"
         {
@@ -42,6 +36,11 @@
             this.valor_x = valor_x;
             this.valor_y = valor_y;
         }
+        public Punto (Expresion componentex, Expresion componentey)
+        {
+            Componente_x = componentex;
+            Componente_y = componentey;
+        }
 
         public Punto(double valorx, double valory)
         {
@@ -55,5 +54,9 @@
 
         public double valor_x { get; }
         public double valor_y { get; }
+    }
+    public interface ILugarGeometrico
+    {
+
     }
 }

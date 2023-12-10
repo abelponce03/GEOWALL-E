@@ -40,6 +40,7 @@ namespace GEOWALL_E
 
         private void DRAW_Click(object sender, EventArgs h)
         {
+            Papel.Clear(BackColor); Papel.Clear(ForeColor);
             Biblioteca.Limpiar();
             string Entrada = PANEL_COMANDOS.Text;
             if (Entrada != string.Empty)
@@ -76,13 +77,8 @@ namespace GEOWALL_E
 
         private void LIMPIAR_Click(object sender, EventArgs e)
         {
-            Papel.Clear(BackColor); Papel.Clear(ForeColor); 
+           
         }
-
-
-
-
-
 
 
 

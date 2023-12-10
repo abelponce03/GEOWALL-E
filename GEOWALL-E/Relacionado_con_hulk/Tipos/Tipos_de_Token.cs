@@ -37,6 +37,8 @@ namespace GEOWALL_E
         resto,
         salto_de_linea,
         la_nada,
+        Corchete_Abierto,
+        Corchete_Cerrado,
 
         //Keywords
         if_Keyword,
@@ -51,7 +53,6 @@ namespace GEOWALL_E
         function_Keyword,
         logaritmo_Keyword,
         clean_keyword,
-
 
         //Expresiones
         Parentesis,
@@ -71,6 +72,8 @@ namespace GEOWALL_E
         parametros_Expresion,
         logaritmo_Expresion,
         clean_Expresion,
+        asignacion_Expresion,
+        asignacion_secuencia_Expresion,
 
         //Geometria expresiones
         point_Expresion,
@@ -80,6 +83,11 @@ namespace GEOWALL_E
         ray_Expresion,
         segment_Expresion,
         measure_Expresion,
+        secuencia_Expresion,
+        undefined_Expresion,
+        randoms_Expresion,
+        samples_Expresion,
+        count_Expresion,
 
         draw_Expresion,
 
@@ -91,6 +99,11 @@ namespace GEOWALL_E
         point_Keyword,
         ray_Keyword,
         segment_Keyword,
+        count_Keyword,
+        undefined_Keyword,
+        randoms_Keyword,
+        samples_Keyword,
+        sequence_Keyword,
 
         draw_Keyword,
 

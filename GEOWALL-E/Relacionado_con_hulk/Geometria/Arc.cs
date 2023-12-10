@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E
 {
-    class Arc : Expresion  //representa una arco de una circunferencia
+    class Arc : Expresion, ILugarGeometrico //representa una arco de una circunferencia
     {
         public Arc(Punto p1, Punto p2, Punto p3, Measure measure)
         {

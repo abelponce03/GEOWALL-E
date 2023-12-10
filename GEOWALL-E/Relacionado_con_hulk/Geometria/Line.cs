@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GEOWALL_E
+namespace GEOWALL_E 
 {
-     class Line: Expresion  //representa una recta
+     class Line: Expresion , ILugarGeometrico
     {
         public Line(Punto p1, Punto p2) 
         {

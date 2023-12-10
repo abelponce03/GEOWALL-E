@@ -48,7 +48,16 @@ namespace GEOWALL_E
                     return Tipo_De_Token.segment_Keyword;
                 case "draw":
                     return Tipo_De_Token.draw_Keyword;
-                
+                case "undefined":
+                    return Tipo_De_Token.undefined_Keyword;
+                case "randoms":
+                    return Tipo_De_Token.randoms_Keyword;
+                case "samples":
+                    return Tipo_De_Token.samples_Keyword;
+                case "count":
+
+
+
                 default:
                     return Tipo_De_Token.Identificador;
             }

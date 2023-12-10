@@ -1,3 +1,5 @@
+using GEOWALL_E.Relacionado_con_hulk.AST;
+using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
@@ -12,6 +14,7 @@ namespace GEOWALL_E
         private int _posicion;
         public List<string> errores = new List<string>();
 
+        private bool IsOtherExpresion = false;
 
         public List<Expresion> Lista = new List<Expresion>();
 
@@ -35,6 +38,7 @@ namespace GEOWALL_E
         {
             int index = _posicion + offset;
             if (index >= _tokens.Length) return _tokens[_tokens.Length - 1];
+            if (index < 0) return _tokens[0];
             else return _tokens[index];
         }
         private Token Verificandose => Tomar(0);
@@ -68,22 +72,17 @@ namespace GEOWALL_E
         }
         public Expresion Parse_Expresion()
         {
-            if (Verificandose.Tipo is Tipo_De_Token.function_Keyword)
-            {
-                return Parse_Declaracion_Funcion();
-            }
             return Parse_Expresion_Binaria();
         }
         private Declaracion_Funcion Parse_Declaracion_Funcion()
         {
-            var keyword = Match(Tipo_De_Token.function_Keyword);
             var nombre = Match(Tipo_De_Token.Identificador);
             var parametros = Parseo_parametros();
-            var implicacion = Match(Tipo_De_Token.Implicacion);
+            Match(Tipo_De_Token.Igual);
             var cuerpo = Parse_Expresion();
             var declaracion_Funcion = new Declaracion_Funcion(nombre.Texto, parametros, cuerpo);
 
-            if (!Biblioteca.Functions.ContainsKey(nombre.Texto) && errores.Count == 0 && nombre.Texto != "sen(x)" && nombre.Texto != "cos(x)" && nombre.Texto != "log(x)")
+            if (!Biblioteca.Functions.ContainsKey(nombre.Texto) && errores.Count == 0 && nombre.Texto != "sen" && nombre.Texto != "cos" && nombre.Texto != "log" && nombre.Texto != "randoms" && nombre.Texto != "samples" && nombre.Texto != "points" && nombre.Texto != "count")
             {
                 Biblioteca.Functions.Add(nombre.Texto, declaracion_Funcion);
             }
@@ -123,8 +122,10 @@ namespace GEOWALL_E
             Proximo_Token();
             return parametros;
         }
-        private Expresion Parse_LLamada_Funcion(string identificador)
+        private Expresion Parse_LLamada_Funcion()
         {
+            var posicion_inicial = _posicion;
+            string indentificador = Verificandose.Texto;
             Proximo_Token();
             var parametros = new List<Expresion>();
 
@@ -154,45 +155,85 @@ namespace GEOWALL_E
 
             Match(Tipo_De_Token.Parentesis_Cerrado);
 
-            return new LLamada_Funcion(identificador, parametros);
+            if (Verificandose.Tipo is Tipo_De_Token.Igual)
+            {
+                _posicion = posicion_inicial;
+                return Parse_Declaracion_Funcion();
+            }
+            else return new LLamada_Funcion(indentificador, parametros);
+
         }
-        private Expresion Parse_Variable_O_LLamada_Funcion()
+        private Expresion Parse_Variable_O_LLamada_Funcion_O_Asignacion_O_Asignacion_Secuencia()
         {
+            //Condicional para llamada de funciones
             if (Verificandose.Tipo == Tipo_De_Token.Identificador
             && Tomar(1).Tipo == Tipo_De_Token.Parentesis_Abierto)
             {
-                return Parse_LLamada_Funcion(Verificandose.Texto);
+                return Parse_LLamada_Funcion();
             }
+            //Condicional para asignacion de secuencia
+            else if(Verificandose.Tipo == Tipo_De_Token.Identificador
+            && Tomar(1).Tipo == Tipo_De_Token.coma && !IsOtherExpresion)
+            {
+                return Parse_Asignacion_de_Secuencia();
+            }
+            //asignacion o llamada de literal
             else
             {
-                var identificador = Proximo_Token();
-                return new Literal(identificador, identificador.Texto);
+                var identificador = Proximo_Token(); 
+
+                if (Verificandose.Tipo == Tipo_De_Token.Igual)
+                {
+                    Proximo_Token();
+                    var _expresion = Parse_Expresion();
+                    return new Asignacion(identificador.Texto, _expresion);
+                }
+                return new Literal(identificador, identificador);
             }
+        }
+        private Expresion Parse_Asignacion_de_Secuencia()
+        {
+            var identificadores = new List<string>();
+            //Primer identificador
+            identificadores.Add(Verificandose.Texto);
+            Proximo_Token();
+            // viene una coma
+            Match(Tipo_De_Token.coma);
+            //Proximo identificador
+            identificadores.Add(Match(Tipo_De_Token.Identificador).Texto);
+            //viene el ciclo
+            while(Verificandose.Tipo == Tipo_De_Token.coma)
+            {
+                Proximo_Token() ;
+                identificadores.Add(Match(Tipo_De_Token.Identificador).Texto);
+            }
+            //identificador de la constante que se va a quedar con el resto de la secuencia
+            var identificador_resto = identificadores[identificadores.Count - 1];
+            identificadores.RemoveAt(identificadores.Count - 1);
+            //ya en este punto no hay mas constantes y queda parsear el igual y la secuencia
+            Match(Tipo_De_Token.Igual);
+            //Secuencia
+            var _expresion = Parse_Expresion();
+
+            return new Asignacion_Secuencia(identificadores, identificador_resto, _expresion);
+
         }
         public Expresion Parse_Let_in_Expresion()
         {
-            var let_id = Match(Tipo_De_Token.let_Keyword);
-            var let_Expresion = Parse_Let_Expresion();
-            var in_id = Match(Tipo_De_Token.in_Keyword);
-            var in_Expresion = Parse_Expresion();
-            return new Let_in(let_Expresion, in_Expresion);
-        }
-        public Let Parse_Let_Expresion()
-        {
-            var keyword = Match(Tipo_De_Token.Identificador);
-            var igual = Match(Tipo_De_Token.Igual);
-            var asignar = Parse_Expresion();
+            List<Expresion> bloque = new List<Expresion>();
+            Match(Tipo_De_Token.let_Keyword);
+            while(Verificandose.Tipo != Tipo_De_Token.in_Keyword)
+            {
+                var _expresion = Parse_Expresion();
 
-            if (Verificandose.Tipo == Tipo_De_Token.coma)
-            {
-                var coma = Match(Tipo_De_Token.coma);
-                var otras_variables = Parse_Let_Expresion();
-                return new Let(keyword, asignar, otras_variables);
+                if (_expresion is Let_in) throw new Exception($"");
+
+                bloque.Add(_expresion);
+                Match(Tipo_De_Token.punto_y_coma);
             }
-            else
-            {
-                return new Let(keyword, asignar);
-            }
+            Match(Tipo_De_Token.in_Keyword);
+            var in_Expresion = Parse_Expresion();
+            return new Let_in(bloque, in_Expresion);
         }
         private Expresion Parse_Expresion_Binaria(int parentPrecedence = 0)
         {
@@ -236,7 +277,7 @@ namespace GEOWALL_E
                     }
                 case Tipo_De_Token.Identificador:
                     {
-                        return Parse_Variable_O_LLamada_Funcion();
+                        return Parse_Variable_O_LLamada_Funcion_O_Asignacion_O_Asignacion_Secuencia();
                     }
                 case Tipo_De_Token.if_Keyword:
                     {
@@ -254,16 +295,9 @@ namespace GEOWALL_E
                         var cl_parentesis = Proximo_Token();
                         Match(Tipo_De_Token.then_Keyword);
                         var expresion = Parse_Expresion();
+                        Match(Tipo_De_Token.else_Keyword);
                         var _else = Parse_Expresion();
-                        if (_else.Tipo != Tipo_De_Token.else_Expresion)
-                            errores.Add($" SEMANTIC ERROR : Invalid expresion <{_else.Tipo}> in position <{_posicion}> expected <{"else_Expresion"}>");
                         return new IF(keyword, op_parentesis, parentesis, cl_parentesis, expresion, _else);
-                    }
-                case Tipo_De_Token.else_Keyword:
-                    {
-                        var keyword = Proximo_Token();
-                        var expresion = Parse_Expresion();
-                        return new Else(keyword, expresion);
                     }
                 case Tipo_De_Token.let_Keyword:
                     {
@@ -348,25 +382,39 @@ namespace GEOWALL_E
 
                 case Tipo_De_Token.point_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
-                        string identificador = Match(Tipo_De_Token.Identificador).Texto;
-                        if (Verificandose.Tipo != Tipo_De_Token.Parentesis_Abierto)
+                        if(Verificandose.Tipo is Tipo_De_Token.Parentesis_Abierto)
                         {
-                            return new Punto(identificador);
-                        }
-                        else
-                        {
-                            //ver con imbert y si me pasan una expresion como parametro?
                             Match(Tipo_De_Token.Parentesis_Abierto);
                             var componente_x = Parse_Expresion();
                             Match(Tipo_De_Token.coma);
                             var componente_y = Parse_Expresion();
                             Match(Tipo_De_Token.Parentesis_Cerrado);
+                            IsOtherExpresion = false;
+                            return new Punto(componente_x, componente_y);
+                        }
+                        else if (Verificandose.Tipo == Tipo_De_Token.Identificador && Tomar(1).Tipo != Tipo_De_Token.Parentesis_Abierto)
+                        {
+                            string identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Punto(identificador);
+                        }
+                        else
+                        {
+                            string identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            Match(Tipo_De_Token.Parentesis_Abierto);
+                            var componente_x = Parse_Expresion();
+                            Match(Tipo_De_Token.coma);
+                            var componente_y = Parse_Expresion();
+                            Match(Tipo_De_Token.Parentesis_Cerrado);
+                            IsOtherExpresion = false;
                             return new Punto(identificador, componente_x, componente_y);
                         }
                     }
                 case Tipo_De_Token.measure_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
                         Match(Tipo_De_Token.Parentesis_Abierto);
                         var P1 = Parse_Expresion();
@@ -379,11 +427,13 @@ namespace GEOWALL_E
                         if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
 
                         Match(Tipo_De_Token.Parentesis_Cerrado);
+                        IsOtherExpresion = false;
                         return new Measure(P1,P2);
                     }
 
                 case Tipo_De_Token.circle_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
                         if(Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
@@ -400,16 +450,19 @@ namespace GEOWALL_E
                             Match(Tipo_De_Token.coma);
                             var radio = Parse_Expresion();
                             Match(Tipo_De_Token.Parentesis_Cerrado);
+                            IsOtherExpresion = false;
                             return new Circle(centro, radio);
                         }
 
                     }
                 case Tipo_De_Token.segment_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
                         if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();
+                            IsOtherExpresion = false;
                             return new Segment(identificador.Texto);
                         }
                         else
@@ -426,16 +479,19 @@ namespace GEOWALL_E
                             if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
+                            IsOtherExpresion = false;
                             return new Segment(P1, P2);
                         }
 
                     }
                 case Tipo_De_Token.line_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
                         if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
-                            var identificador = Proximo_Token();    
+                            var identificador = Proximo_Token();
+                            IsOtherExpresion = false;
                             return new Line(identificador.Texto);
                         }
                         else
@@ -451,15 +507,18 @@ namespace GEOWALL_E
                             if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
+                            IsOtherExpresion = false;
                             return new Line(P1, P2);
                         }
                     }
                 case Tipo_De_Token.ray_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
                         if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();
+                            IsOtherExpresion = false;
                             return new Ray(identificador.Texto);
                         }
                         else
@@ -475,11 +534,14 @@ namespace GEOWALL_E
                             if (P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"");
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
+
+                            IsOtherExpresion = false;
                             return new Ray(P1, P2);
                         }
                     }
                 case Tipo_De_Token.arc_Keyword:
                     {
+                        IsOtherExpresion = true;
                         Proximo_Token();
 
                         Match(Tipo_De_Token.Parentesis_Abierto);
@@ -501,9 +563,64 @@ namespace GEOWALL_E
                         var radio = Parse_Expresion();
 
                         Match(Tipo_De_Token.Parentesis_Cerrado);
+
+                        IsOtherExpresion = false;
                         return new Arc(P1, P2, P3, radio);
                     }
 
+                    /// PARSEO DE SECUENCIAS FINITAS
+                case Tipo_De_Token.Corchete_Abierto:
+                    {
+                        IsOtherExpresion = true;
+                        Match(Tipo_De_Token.Corchete_Abierto);
+                        var secuencia = new Secuencias();
+                        if (Verificandose.Tipo is Tipo_De_Token.Corchete_Cerrado)
+                        {
+                            Proximo_Token();
+                            IsOtherExpresion = false;
+                            return secuencia;
+                        }
+
+                        secuencia.Add(Parse_Expresion());
+
+                        while (Verificandose.Tipo == Tipo_De_Token.coma)
+                        {
+                            Proximo_Token();
+                            secuencia.Add(Parse_Expresion());
+                        }
+                        Match(Tipo_De_Token.Corchete_Cerrado);
+                        IsOtherExpresion = false;
+                        return secuencia;
+                    }
+                case Tipo_De_Token.undefined_Keyword:
+                {
+                        Proximo_Token();
+                   return new undefined();
+                }
+                case Tipo_De_Token.randoms_Keyword:
+                {
+                        Proximo_Token();
+                        Match(Tipo_De_Token.Parentesis_Abierto);
+                        Match(Tipo_De_Token.Parentesis_Cerrado);
+                        return new Randoms();
+                }
+                case Tipo_De_Token.samples_Keyword:
+                    {
+                        Proximo_Token();
+                        Match(Tipo_De_Token.Parentesis_Abierto);
+                        Match(Tipo_De_Token.Parentesis_Cerrado);
+                        return new Samples();
+                    }
+                case Tipo_De_Token.count_Keyword:
+                    {
+                        IsOtherExpresion = true;
+                        Proximo_Token();
+                        Match(Tipo_De_Token.Parentesis_Abierto);
+                        var _expresion = Parse_Expresion();
+                        Match(Tipo_De_Token.Parentesis_Cerrado);
+                        IsOtherExpresion = false;
+                        return new Count(_expresion); 
+                    }
                 default:
                     {
                         var token_num = Match(Tipo_De_Token.Numero);
