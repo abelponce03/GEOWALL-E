@@ -55,8 +55,9 @@ namespace GEOWALL_E
                 case "samples":
                     return Tipo_De_Token.samples_Keyword;
                 case "count":
-
-
+                    return Tipo_De_Token.count_Keyword;
+                case "sequence":
+                    return Tipo_De_Token.sequence_Keyword;
 
                 default:
                     return Tipo_De_Token.Identificador;

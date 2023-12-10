@@ -89,6 +89,12 @@ namespace GEOWALL_E
         samples_Expresion,
         count_Expresion,
 
+        point_sequence_Expresion,
+        line_sequence_Expresion,
+        circle_sequence_Expresion,
+        ray_sequence_Expresion,
+        segment_sequence_Expresion,
+
         draw_Expresion,
 
         //Geometria keywords

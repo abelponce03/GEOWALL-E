@@ -1,6 +1,7 @@
 using GEOWALL_E.Relacionado_con_hulk.AST;
 using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions;
+using System.Diagnostics.Eventing.Reader;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
 
@@ -384,7 +385,14 @@ namespace GEOWALL_E
                     {
                         IsOtherExpresion = true;
                         Proximo_Token();
-                        if(Verificandose.Tipo is Tipo_De_Token.Parentesis_Abierto)
+                        if(Verificandose.Tipo is Tipo_De_Token.sequence_Keyword)
+                        {
+                            Proximo_Token();
+                            var identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Point_Sequence(identificador);
+                        }
+                        else if(Verificandose.Tipo is Tipo_De_Token.Parentesis_Abierto)
                         {
                             Match(Tipo_De_Token.Parentesis_Abierto);
                             var componente_x = Parse_Expresion();
@@ -435,7 +443,14 @@ namespace GEOWALL_E
                     {
                         IsOtherExpresion = true;
                         Proximo_Token();
-                        if(Verificandose.Tipo == Tipo_De_Token.Identificador)
+                        if(Verificandose.Tipo is Tipo_De_Token.sequence_Keyword)
+                        {
+                            Proximo_Token();
+                            var identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Circle_Sequence(identificador);
+                        }
+                        else if(Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();    
                             return new Circle(identificador.Texto);
@@ -459,7 +474,14 @@ namespace GEOWALL_E
                     {
                         IsOtherExpresion = true;
                         Proximo_Token();
-                        if (Verificandose.Tipo == Tipo_De_Token.Identificador)
+                        if(Verificandose.Tipo is Tipo_De_Token.sequence_Keyword)
+                        {
+                            Proximo_Token();
+                            var identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Segment_Sequence(identificador);
+                        }
+                        else if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;
@@ -488,7 +510,14 @@ namespace GEOWALL_E
                     {
                         IsOtherExpresion = true;
                         Proximo_Token();
-                        if (Verificandose.Tipo == Tipo_De_Token.Identificador)
+                        if(Verificandose.Tipo is Tipo_De_Token.sequence_Keyword)
+                        {
+                            Proximo_Token();
+                            var identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Line_Sequence(identificador);
+                        }
+                        else if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;
@@ -515,7 +544,14 @@ namespace GEOWALL_E
                     {
                         IsOtherExpresion = true;
                         Proximo_Token();
-                        if (Verificandose.Tipo == Tipo_De_Token.Identificador)
+                        if(Verificandose.Tipo is Tipo_De_Token.sequence_Keyword)
+                        {
+                            Proximo_Token();
+                            var identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Ray_Sequence(identificador);
+                        }
+                        else if (Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;

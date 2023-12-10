@@ -74,6 +74,11 @@ namespace GEOWALL_E
                 case Randoms: return Evaluar_Expresion_Randoms((Randoms)nodo);
                 case Samples: return Evaluar_Expresion_Samples((Samples)nodo);
                 case Count: return Evaluar_Expresion_Count((Count)nodo);
+                case Point_Sequence: return Evaluar_Expresion_Point_Sequence((Point_Sequence)nodo);
+                case Line_Sequence: return Evaluar_Expresion_Line_Sequence((Line_Sequence)nodo);
+                case Circle_Sequence: return Evaluar_Expresion_Circle_Sequence((Circle_Sequence)nodo);
+                case Ray_Sequence: return Evaluar_Expresion_Ray_Sequence((Ray_Sequence)nodo);
+                case Segment_Sequence: return Evaluar_Expresion_Segment_Sequence((Segment_Sequence)nodo);
                 case undefined: return null;
 
                 //------------------------------------------------//GEOMETRIA//------------------------------------------------------//
@@ -338,12 +343,48 @@ namespace GEOWALL_E
         }
         private object Evaluar_Expresion_Count(Count count)
         {
-            if (count._Secuencia is Secuencias)
+            
+            if(count._Secuencia is Literal)
             {
-                Secuencias_Evaluada _secuencia = (Secuencias_Evaluada)Evaluar_Expresion(count._Secuencia);
-                return _secuencia.Count;
+                var expresion = Evaluar_Expresion(count._Secuencia);
+                if(expresion is Secuencias_Evaluada)
+                {
+                    Secuencias_Evaluada _secuencia = (Secuencias_Evaluada) expresion;
+                    return _secuencia.Count;
+                }
+                else throw new Exception($"! SEMANTIC ERROR : This expression does not have the count property");
             }
-            else throw new Exception($"");
+            else if(count._Secuencia is undefined)
+            {
+                return new undefined();
+            }
+            else throw new Exception($"! SEMANTIC ERROR : This expression does not have the count property");
+        }
+
+        private object Evaluar_Expresion_Point_Sequence(Point_Sequence point_Sequence)
+        {
+            if(Biblioteca.Pila.Count == 0) Biblioteca.Variables[point_Sequence.Identificador] = point_Sequence._Secuencias_Evaluada;
+            return null;
+        }
+        private object Evaluar_Expresion_Line_Sequence(Line_Sequence line_Sequence)
+        {
+            if (Biblioteca.Pila.Count == 0) Biblioteca.Variables[line_Sequence.Identificador] = line_Sequence._Secuencias_Evaluada;
+            return null;
+        }
+        private object Evaluar_Expresion_Circle_Sequence(Circle_Sequence circle_Sequence)
+        {
+            if (Biblioteca.Pila.Count == 0) Biblioteca.Variables[circle_Sequence.Identificador] = circle_Sequence._Secuencias_Evaluada;
+            return null;
+        }
+        private object Evaluar_Expresion_Ray_Sequence(Ray_Sequence ray_Sequence)
+        {
+            if (Biblioteca.Pila.Count == 0) Biblioteca.Variables[ray_Sequence.Identificador] = ray_Sequence._Secuencias_Evaluada;
+            return null;
+        }
+        private object Evaluar_Expresion_Segment_Sequence(Segment_Sequence segment_Sequence)
+        {
+            if (Biblioteca.Pila.Count == 0) Biblioteca.Variables[segment_Sequence.Identificador] = segment_Sequence._Secuencias_Evaluada;
+            return null;
         }
         private object Evaluar_Expresion_Binaria(Expresion_Binaria b)
         {
