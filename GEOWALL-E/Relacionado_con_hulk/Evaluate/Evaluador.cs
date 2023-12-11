@@ -1,6 +1,8 @@
 using GEOWALL_E.Relacionado_con_hulk.AST;
+using GEOWALL_E.Relacionado_con_hulk.Colores;
 using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions;
+using GEOWALL_E.Relacionado_con_hulk.Geometria.Intersections;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -16,6 +18,10 @@ namespace GEOWALL_E
         private readonly List<Expresion> _rama;
 
         private int _posicion;
+
+        private Color color_lapiz;
+
+        private Stack<Color> Colores = new Stack<Color>();
 
         public Evaluador(List<Expresion> rama)
         {
@@ -37,6 +43,8 @@ namespace GEOWALL_E
         }
         public void Evaluar()
         {
+            Colores.Push(Color.Black);
+
             while (_posicion < _rama.Count)
             {
                 Evaluar_Expresion(Verificandose);
@@ -91,12 +99,32 @@ namespace GEOWALL_E
                 case Ray: return Evaluar_Expresion_Ray((Ray)nodo);
                 case Arc: return Evaluar_Expresion_Arc((Arc)nodo);
 
+                //---------------------------------------------------// INTERSECCION //-----------------------------------------------------//
+
+                
+
                 //---------------------------------------------------// Dibujo //-----------------------------------------------------//
 
                 case Dibujar: return Evaluar_Expresion_Dibujar((Dibujar)nodo);
+                case Cambiar_Color: return Cambiar_Color_Lapiz((Cambiar_Color)nodo);
+                case Restore: return Color_Anterior();
 
                 default: throw new Exception($"! SYNTAX ERROR : Unexpected node <{nodo}>");
             }
+        }
+        private object Color_Anterior()
+        {
+            if (Colores.Count == 1) return null;
+            else
+            {
+                Colores.Pop();
+                return null;
+            }
+        }
+        private object Cambiar_Color_Lapiz(Cambiar_Color cambiar_Color)
+        {
+            Colores.Push(cambiar_Color._Color);
+            return null;
         }
         private static void Verificar_tipos(Expresion_Binaria b, object left, object right)
         {
@@ -617,7 +645,9 @@ namespace GEOWALL_E
         }
         private  object Evaluar_Expresion_Dibujar(Dibujar p)
         {
-            Pen lapiz = new Pen(Color.Black, 4);
+            color_lapiz = Colores.Peek();
+
+            Pen lapiz = new Pen(color_lapiz, 4);
 
             switch (p._Expresion.Tipo)
             {

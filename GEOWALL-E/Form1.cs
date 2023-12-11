@@ -38,7 +38,7 @@ namespace GEOWALL_E
 
         }
 
-        private void DRAW_Click(object sender, EventArgs h) // esto es para Imbert
+        private void DRAW_Click(object sender, EventArgs h)
         {
             Papel.Clear(BackColor); Papel.Clear(ForeColor);
             Biblioteca.Limpiar();

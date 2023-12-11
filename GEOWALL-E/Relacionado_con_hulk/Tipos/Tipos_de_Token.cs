@@ -88,6 +88,7 @@ namespace GEOWALL_E
         randoms_Expresion,
         samples_Expresion,
         count_Expresion,
+        intersect_Expresion,
 
         point_sequence_Expresion,
         line_sequence_Expresion,
@@ -110,9 +111,17 @@ namespace GEOWALL_E
         randoms_Keyword,
         samples_Keyword,
         sequence_Keyword,
+        intersect_Keyword,
 
         draw_Keyword,
 
+
+        //Colores
+        color_Keyword,
+        color_Expresion,
+
+        restore_Keyword,
+        restore_Expresion,
     }
 }
 

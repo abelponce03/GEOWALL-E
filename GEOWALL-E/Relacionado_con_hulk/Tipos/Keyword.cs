@@ -58,6 +58,12 @@ namespace GEOWALL_E
                     return Tipo_De_Token.count_Keyword;
                 case "sequence":
                     return Tipo_De_Token.sequence_Keyword;
+                case "intersect":
+                    return Tipo_De_Token.intersect_Keyword;
+                case "color":
+                    return Tipo_De_Token.color_Keyword;
+                case "restore":
+                    return Tipo_De_Token.restore_Keyword;
 
                 default:
                     return Tipo_De_Token.Identificador;

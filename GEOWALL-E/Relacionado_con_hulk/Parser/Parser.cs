@@ -1,6 +1,9 @@
 using GEOWALL_E.Relacionado_con_hulk.AST;
+using GEOWALL_E.Relacionado_con_hulk.Colores;
 using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions;
+using GEOWALL_E.Relacionado_con_hulk.Geometria.Intersections;
+using GEOWALL_E.Relacionado_con_hulk.Tipos;
 using System.Diagnostics.Eventing.Reader;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
@@ -647,6 +650,10 @@ namespace GEOWALL_E
                         Match(Tipo_De_Token.Parentesis_Cerrado);
                         return new Samples();
                     }
+                //        Match(Tipo_De_Token.Parentesis_Cerrado);
+
+                //    }
+
                 case Tipo_De_Token.count_Keyword:
                     {
                         IsOtherExpresion = true;
@@ -655,8 +662,37 @@ namespace GEOWALL_E
                         var _expresion = Parse_Expresion();
                         Match(Tipo_De_Token.Parentesis_Cerrado);
                         IsOtherExpresion = false;
-                        return new Count(_expresion); 
+                        return new Count(_expresion);
                     }
+                // Parseo de Interseccion
+                //case Tipo_De_Token.intersect_Keyword:
+                //    {
+                //        IsOtherExpresion = true;
+                //        Proximo_Token();
+                //        Match(Tipo_De_Token.Parentesis_Abierto);
+                //        var figura_1 = Parse_Expresion();
+                //        Match(Tipo_De_Token.coma);
+                //        var figura_2 = Parse_Expresion();
+                //        IsOtherExpresion = false;
+                //
+                //    }
+
+                    //CAMBIO DE COLORES
+                case Tipo_De_Token.color_Keyword:
+                    {
+                        Proximo_Token();
+                        var color = Colores.VerColor(Verificandose.Texto);
+                        Proximo_Token();
+                        return new Cambiar_Color(color);
+                    }
+                //RESTAURAR EL COLOR ANTERIOR
+                case Tipo_De_Token.restore_Keyword:
+                    {
+                        Proximo_Token();
+                        return new Restore();
+                    }
+
+
                 default:
                     {
                         var token_num = Match(Tipo_De_Token.Numero);
