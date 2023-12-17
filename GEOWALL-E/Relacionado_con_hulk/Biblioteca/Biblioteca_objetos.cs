@@ -8,6 +8,16 @@ namespace GEOWALL_E
 
         public static Stack<Dictionary<string, object>> Pila = new Stack<Dictionary<string, object>>();
 
+        public static List<Label> etiquetas = new List<Label>();
+
+        public static void Eliminar_Etiquetas()
+        {
+            foreach (var x in etiquetas)
+            {
+                GEOWALL_E.PANEL_DIBUJO.Controls.Remove(x);
+            }
+        }
+
         public static void Limpiar()
         {
             Variables.Clear();

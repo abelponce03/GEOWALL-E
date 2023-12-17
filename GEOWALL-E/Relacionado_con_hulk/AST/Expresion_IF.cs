@@ -2,12 +2,9 @@ namespace GEOWALL_E
 {
     sealed class IF : Expresion
     {
-        public IF(Token keyword, Token parentesis_abierto, Expresion condicion, Token parentesis_cerrado, Expresion expresion, Expresion _else)
+        public IF(Expresion condicion, Expresion expresion, Expresion _else)
         {
-            Keyword = keyword;
-            _parentesis_abierto = parentesis_abierto;
             Condicion = condicion;
-            _parentesis_cerrado = parentesis_cerrado;
             _expresion = expresion;
             _Else = _else;
         }

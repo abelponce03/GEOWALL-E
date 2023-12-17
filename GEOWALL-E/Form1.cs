@@ -40,14 +40,15 @@ namespace GEOWALL_E
 
         private void DRAW_Click(object sender, EventArgs h)
         {
+            
             Papel.Clear(BackColor); Papel.Clear(ForeColor);
             Biblioteca.Limpiar();
+            Biblioteca.Eliminar_Etiquetas();
             string Entrada = PANEL_COMANDOS.Text;
             if (Entrada != string.Empty)
             {
                 try
                 {
-
                     var Parser = new Parser(Entrada);
                     var Arbol = Parser.Parse();
 
@@ -69,18 +70,30 @@ namespace GEOWALL_E
 
         }
 
-
+        // boton para importar contenido
         private void IMPORT_Click(object sender, EventArgs e)
         {
-
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string path = openFileDialog1.FileName;
+                string import = File.ReadAllText(path);
+                PANEL_COMANDOS.Text = PANEL_COMANDOS.Text + "\n" + import;
+            }
         }
 
-        private void LIMPIAR_Click(object sender, EventArgs e)
+        //Boton para guardar contenido
+        private void SAVE_Click(object sender, EventArgs e)
         {
-           
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string path = saveFileDialog1.FileName;
+                string code = PANEL_COMANDOS.Text;
+                StreamWriter streamWriter = File.CreateText(path);
+                streamWriter.Write(code);
+                streamWriter.Flush();
+                streamWriter.Close();
+            }
         }
-
-
 
 
 
@@ -123,5 +136,6 @@ namespace GEOWALL_E
                 this.WindowState = FormWindowState.Normal;
             }
         }
+       
     }
 }

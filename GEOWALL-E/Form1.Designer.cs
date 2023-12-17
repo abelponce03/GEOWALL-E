@@ -41,6 +41,8 @@
             MIN_BTN = new Boton_personalizado();
             BARRA_SUPERIOR = new Panel();
             MAX_BTN = new Boton_personalizado();
+            openFileDialog1 = new OpenFileDialog();
+            saveFileDialog1 = new SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)PANEL_DIBUJO).BeginInit();
             BARRA_SUPERIOR.SuspendLayout();
             SuspendLayout();
@@ -149,10 +151,10 @@
             LIMPIAR.Name = "LIMPIAR";
             LIMPIAR.Size = new Size(163, 79);
             LIMPIAR.TabIndex = 11;
-            LIMPIAR.Text = "CLEAN";
+            LIMPIAR.Text = "SAVE";
             LIMPIAR.TextColor = Color.White;
             LIMPIAR.UseVisualStyleBackColor = false;
-            LIMPIAR.Click += LIMPIAR_Click;
+            LIMPIAR.Click += SAVE_Click;
             // 
             // CLOSE_BTN
             // 
@@ -232,6 +234,10 @@
             MAX_BTN.UseVisualStyleBackColor = false;
             MAX_BTN.Click += MAX_BTN_Click_1;
             // 
+            // openFileDialog1
+            // 
+            openFileDialog1.FileName = "openFileDialog1";
+            // 
             // GEOWALL_E
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -261,7 +267,7 @@
 
         #endregion
         private TextBox PANEL_COMANDOS;
-        private PictureBox PANEL_DIBUJO;
+        public static PictureBox PANEL_DIBUJO;
         private Label IMAGEN_WALL_E_NOMBRE;
         private Label WALLE_E_NOMBRE;
         private Label IMAGEN_WALLE;
@@ -272,5 +278,7 @@
         private Boton_personalizado MIN_BTN;
         private Panel BARRA_SUPERIOR;
         private Boton_personalizado MAX_BTN;
+        private OpenFileDialog openFileDialog1;
+        private SaveFileDialog saveFileDialog1;
     }
 }

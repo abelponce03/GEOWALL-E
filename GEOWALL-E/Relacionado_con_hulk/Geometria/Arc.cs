@@ -8,6 +8,15 @@ namespace GEOWALL_E
 {
     class Arc : Expresion, ILugarGeometrico //representa una arco de una circunferencia
     {
+        public Arc(string identificador) 
+        {
+            Random random = new Random();
+            Identificador = identificador;
+            P1 = new Punto();
+            P2 = new Punto();
+            P3 = new Punto();
+            _Measure = new Measure(random.Next(0, 400));
+        }
         public Arc(Punto p1, Punto p2, Punto p3, Measure measure)
         {
             P1 = p1;
@@ -27,7 +36,8 @@ namespace GEOWALL_E
         public Expresion P1 { get; }
         public Expresion P2 { get; }
         public Expresion P3 { get; }
-
         public Expresion _Measure { get; }
+
+        public string Identificador { get; }
     }
 }

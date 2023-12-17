@@ -12,7 +12,7 @@ namespace GEOWALL_E.Relacionado_con_hulk.Geometria
 
         public string Identificador { get; }
 
-        public Secuencias_Evaluada _Secuencias_Evaluada { get; set; }
+        public Secuencias<object> _Secuencias_Evaluada { get; set; }
 
         public Ray_Sequence(string identificador)
         {
@@ -21,7 +21,7 @@ namespace GEOWALL_E.Relacionado_con_hulk.Geometria
             Random _random = new Random();
             int tope = _random.Next(0, 500);
 
-            Secuencias_Evaluada _secuencia = new Secuencias_Evaluada();
+            Secuencias<object> _secuencia = new Secuencias<object>();
             for (int i = 0; i < tope; i++)
             {
                 Random rd = new Random();

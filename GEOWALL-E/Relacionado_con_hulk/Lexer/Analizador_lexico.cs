@@ -45,6 +45,11 @@ namespace GEOWALL_E
                 errores.Add($"! SYNTAX ERROR : Expected in string expresion close <\"> in position  <{_posicion}>");
                 _posicion = inicio;
             }
+            if (charete == '.' && Tomar(1) == '.' && Tomar(2) == '.')
+            {
+                _posicion += 3;
+                return new Token(Tipo_De_Token.intervalo_infinito, inicio, "...", null);
+            }
 
             if (char.IsDigit(charete))
             {
@@ -96,7 +101,7 @@ namespace GEOWALL_E
 
                 case '\n': return new Token(Tipo_De_Token.la_nada, _posicion++, "\n", null);
 
-                case '_' : return new Token(Tipo_De_Token.Identificador, _posicion++, "underscore", null); 
+                case '_' : return new Token(Tipo_De_Token.Identificador, _posicion++, "underscore", null);
 
                 case ';':
                     {
@@ -149,7 +154,6 @@ namespace GEOWALL_E
                     }
             }
             errores.Add($"! LEXICAL ERROR : Unexpected Token <{charete}> in position <{_posicion}>");
-
             return new Token(Tipo_De_Token.Malo, _posicion++, texto.Substring(_posicion - 1, 1), null);
         }
         private bool IsString()
