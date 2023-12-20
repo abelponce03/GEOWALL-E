@@ -22,5 +22,8 @@ namespace GEOWALL_E.Relacionado_con_hulk.Geometria
             Identificador_resto_de_secuencia = identificador_resto_de_secuencia;
             _Secuencia = _secuencia;
         }
+
+
+
     }
 }

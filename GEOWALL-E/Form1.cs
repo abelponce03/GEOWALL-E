@@ -43,7 +43,7 @@ namespace GEOWALL_E
             
             Papel.Clear(BackColor); Papel.Clear(ForeColor);
             Biblioteca.Limpiar();
-            Biblioteca.Eliminar_Etiquetas();
+           
             string Entrada = PANEL_COMANDOS.Text;
             if (Entrada != string.Empty)
             {

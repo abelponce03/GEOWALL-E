@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E.Relacionado_con_hulk.Geometria
 {
-    class undefined : Expresion
+   public class undefined : Expresion
     {
         public override Tipo_De_Token Tipo => Tipo_De_Token.undefined_Expresion;
     }

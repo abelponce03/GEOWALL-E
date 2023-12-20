@@ -1,11 +1,13 @@
 using GEOWALL_E.Relacionado_con_hulk.AST;
 using GEOWALL_E.Relacionado_con_hulk.Colores;
+using GEOWALL_E.Relacionado_con_hulk.Declaraciones_de_figuras;
 using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Intersections;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Secuencias;
 using GEOWALL_E.Relacionado_con_hulk.Tipos;
 using System.Diagnostics.Eventing.Reader;
+using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
 
@@ -81,9 +83,11 @@ namespace GEOWALL_E
         }
         private Declaracion_Funcion Parse_Declaracion_Funcion()
         {
+            IsOtherExpresion = true;
             var nombre = Match(Tipo_De_Token.Identificador);
             var parametros = Parseo_parametros();
             Match(Tipo_De_Token.Igual);
+            IsOtherExpresion = false;
             var cuerpo = Parse_Expresion();
             var declaracion_Funcion = new Declaracion_Funcion(nombre.Texto, parametros, cuerpo);
 
@@ -95,7 +99,6 @@ namespace GEOWALL_E
             {
                 errores.Add($"! FUNCTION ERROR : Function <{nombre.Texto}> is already defined");
             }
-
             return declaracion_Funcion;
         }
         public List<string> Parseo_parametros()
@@ -129,6 +132,7 @@ namespace GEOWALL_E
         }
         private Expresion Parse_LLamada_Funcion()
         {
+            IsOtherExpresion = true;
             var posicion_inicial = _posicion;
             string indentificador = Verificandose.Texto;
             Proximo_Token();
@@ -163,9 +167,16 @@ namespace GEOWALL_E
             if (Verificandose.Tipo is Tipo_De_Token.Igual)
             {
                 _posicion = posicion_inicial;
+                IsOtherExpresion = false;
                 return Parse_Declaracion_Funcion();
             }
-            else return new LLamada_Funcion(indentificador, parametros);
+            
+            else
+            {
+                IsOtherExpresion = false;
+                return new LLamada_Funcion(indentificador, parametros);
+            }
+               
 
         }
         private Expresion Parse_Variable_O_LLamada_Funcion_O_Asignacion_O_Asignacion_Secuencia()
@@ -301,9 +312,7 @@ namespace GEOWALL_E
                 case Tipo_De_Token.print_Keyword:
                     {
                         Proximo_Token();
-                        Match(Tipo_De_Token.Parentesis_Abierto);
                         var _expresion = Parse_Expresion();
-                        Match(Tipo_De_Token.Parentesis_Cerrado);
                         return new Print(_expresion);
                     }
                 case Tipo_De_Token.let_Keyword:
@@ -383,6 +392,11 @@ namespace GEOWALL_E
                     {
                         Proximo_Token();
                         var _expresion = Parse_Expresion();
+                        if(Verificandose.Tipo is Tipo_De_Token.String)
+                        {
+                            var etiqueta = Proximo_Token().Texto;
+                            return new Dibujar(_expresion, etiqueta);
+                        }
                         return new Dibujar(_expresion);
                     }
 
@@ -398,6 +412,12 @@ namespace GEOWALL_E
                             IsOtherExpresion = false;
                             return new Point_Sequence(identificador);
                         }
+                        else if (Verificandose.Tipo == Tipo_De_Token.Identificador && Tomar(1).Tipo != Tipo_De_Token.Parentesis_Abierto)
+                        {
+                            string identificador = Match(Tipo_De_Token.Identificador).Texto;
+                            IsOtherExpresion = false;
+                            return new Generacion_Punto(identificador);
+                        }
                         else if(Verificandose.Tipo is Tipo_De_Token.Parentesis_Abierto)
                         {
                             Match(Tipo_De_Token.Parentesis_Abierto);
@@ -406,14 +426,9 @@ namespace GEOWALL_E
                             var componente_y = Parse_Expresion();
                             Match(Tipo_De_Token.Parentesis_Cerrado);
                             IsOtherExpresion = false;
-                            return new Punto(componente_x, componente_y);
+                            return new Generacion_Punto(componente_x, componente_y);
                         }
-                        else if (Verificandose.Tipo == Tipo_De_Token.Identificador && Tomar(1).Tipo != Tipo_De_Token.Parentesis_Abierto)
-                        {
-                            string identificador = Match(Tipo_De_Token.Identificador).Texto;
-                            IsOtherExpresion = false;
-                            return new Punto(identificador);
-                        }
+                        
                         else
                         {
                             string identificador = Match(Tipo_De_Token.Identificador).Texto;
@@ -423,7 +438,7 @@ namespace GEOWALL_E
                             var componente_y = Parse_Expresion();
                             Match(Tipo_De_Token.Parentesis_Cerrado);
                             IsOtherExpresion = false;
-                            return new Punto(identificador, componente_x, componente_y);
+                            return new Generacion_Punto(identificador, componente_x, componente_y);
                         }
                     }
                 case Tipo_De_Token.measure_Keyword:
@@ -435,9 +450,6 @@ namespace GEOWALL_E
 
                         Match(Tipo_De_Token.coma);
                         var P2 = Parse_Expresion();
-
-                        if (P1.Tipo != Tipo_De_Token.Literal && P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"! FUNCTION ERROR : Measure function takes two arguments points");
-
                         Match(Tipo_De_Token.Parentesis_Cerrado);
                         IsOtherExpresion = false;
                         return new Measure(P1,P2);
@@ -457,7 +469,7 @@ namespace GEOWALL_E
                         else if(Verificandose.Tipo == Tipo_De_Token.Identificador)
                         {
                             var identificador = Proximo_Token();    
-                            return new Circle(identificador.Texto);
+                            return new Generar_Circulo(identificador.Texto);
                         }
                         else
                         {
@@ -468,10 +480,8 @@ namespace GEOWALL_E
                             var radio = Parse_Expresion();
                             Match(Tipo_De_Token.Parentesis_Cerrado);
 
-                            if (centro.Tipo != Tipo_De_Token.Literal) throw new Exception($"! FUNCTION ERROR : Circle function takes a point and an argument measure");
-
                             IsOtherExpresion = false;
-                            return new Circle(centro, radio);
+                            return new Generar_Circulo(centro, radio);
                         }
 
                     }
@@ -490,7 +500,7 @@ namespace GEOWALL_E
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;
-                            return new Segment(identificador.Texto);
+                            return new Generar_Segmento(identificador.Texto);
                         }
                         else
                         {
@@ -502,11 +512,8 @@ namespace GEOWALL_E
                             var P2 = Parse_Expresion();
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
-
-                            if (P1.Tipo != Tipo_De_Token.Literal && P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"! FUNCTION ERROR : Segment function takes two arguments points");
-
                             IsOtherExpresion = false;
-                            return new Segment(P1, P2);
+                            return new Generar_Segmento(P1, P2);
                         }
 
                     }
@@ -525,7 +532,7 @@ namespace GEOWALL_E
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;
-                            return new Line(identificador.Texto);
+                            return new Generar_Linea(identificador.Texto);
                         }
                         else
                         {
@@ -537,9 +544,8 @@ namespace GEOWALL_E
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
 
-                            if (P1.Tipo != Tipo_De_Token.Literal && P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"! FUNCTION ERROR : Line function takes two arguments points");
                             IsOtherExpresion = false;
-                            return new Line(P1, P2);
+                            return new Generar_Linea(P1, P2);
                         }
                     }
                 case Tipo_De_Token.ray_Keyword:
@@ -557,7 +563,7 @@ namespace GEOWALL_E
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;
-                            return new Ray(identificador.Texto);
+                            return new Generar_Rayo(identificador.Texto);
                         }
                         else
                         {
@@ -569,9 +575,8 @@ namespace GEOWALL_E
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
 
-                            if (P1.Tipo != Tipo_De_Token.Literal && P2.Tipo != Tipo_De_Token.Literal) throw new Exception($"! FUNCTION ERROR : Ray function takes two arguments points");
-                            IsOtherExpresion = false;
-                            return new Ray(P1, P2);
+                           IsOtherExpresion = false;
+                            return new Generar_Rayo(P1, P2);
                         }
                     }
                 case Tipo_De_Token.arc_Keyword:
@@ -582,7 +587,7 @@ namespace GEOWALL_E
                         {
                             var identificador = Proximo_Token();
                             IsOtherExpresion = false;
-                            return new Arc(identificador.Texto);
+                            return new Generar_Arco(identificador.Texto);
                         }
                         else
                         {
@@ -595,15 +600,14 @@ namespace GEOWALL_E
                             Match(Tipo_De_Token.coma);
                             var P3 = Parse_Expresion();
 
-                            if (P1.Tipo != Tipo_De_Token.Literal && P2.Tipo != Tipo_De_Token.Literal && P3.Tipo != Tipo_De_Token.Literal ) throw new Exception($"! FUNCTION ERROR : Arc function takes three points and an argument measure");
-
+                     
                             Match(Tipo_De_Token.coma);
                             var radio = Parse_Expresion();
 
                             Match(Tipo_De_Token.Parentesis_Cerrado);
 
                             IsOtherExpresion = false;
-                            return new Arc(P1, P2, P3, radio);
+                            return new Generar_Arco(P1, P2, P3, radio);
                         }
                     }
 
@@ -629,7 +633,12 @@ namespace GEOWALL_E
                         {
                             Proximo_Token();
                             var _expresion = Parse_Expresion();
+                            if (secuencia[0].GetType() != _expresion.GetType())
+                            {
+                                throw new Exception($"! SEMANTIC ERROR : This sequence only contains object of type <{secuencia[0].GetType().Name}> not <{_expresion.GetType().Name}>");
+                            }
                             secuencia.Add(_expresion);
+                            secuencia_infinita.Add(_expresion);
                         }
 
                         //SECUENCIA INFINITA
@@ -639,7 +648,25 @@ namespace GEOWALL_E
                             //este es por si le quieren poner un tope {a ... b}
                             if(Verificandose.Tipo != Tipo_De_Token.Corchete_Cerrado)
                             {
+                                //no esta definida la secuencia {1, 2, ...}
+                                if (secuencia_infinita.Count != 1) throw new Exception($"! SYNTAX ERROR : Invalid syntax sequence");
+
                                 secuencia_infinita.Add(Parse_Expresion());
+                                //no estan definidas las secuencias infinitas de otros tipos
+                                if (secuencia_infinita[0] is not  Literal || secuencia_infinita[secuencia_infinita.Count - 1] is not Literal)
+                                {
+                                    throw new Exception($"! SEMANTIC ERROR : This sequence only contains object of type <Literal>");
+                                }
+
+                                Literal first = (Literal)secuencia_infinita[0];
+                                Literal Last = (Literal)secuencia_infinita[secuencia_infinita.Count - 1];
+
+                                // hay que evitar errores como {3 ... 2}
+                                if(first.Valor is not string && Last.Valor is not string && (double)first.Valor >= (double) Last.Valor)
+                                {
+                                    throw new Exception($"! SEMANTIC ERROR : Top <{Last.Valor}> cannot be less than <{first.Valor}>");
+                                }
+
                                 Match(Tipo_De_Token.Corchete_Cerrado);
                                 IsOtherExpresion = false;
                                 return secuencia_infinita;
@@ -647,6 +674,8 @@ namespace GEOWALL_E
                             // este cuando hacem { 1...};
                             else 
                             {
+                                if (secuencia_infinita.Count != 1) throw new Exception($"! SYNTAX ERROR : Invalid syntax sequence");
+
                                 Match(Tipo_De_Token.Corchete_Cerrado);
                                 IsOtherExpresion = false;
 
@@ -656,6 +685,19 @@ namespace GEOWALL_E
                         Match(Tipo_De_Token.Corchete_Cerrado);
                         IsOtherExpresion = false;
                         return secuencia;
+                    }
+                    //INTERCECT PARSEOOOOO
+                case Tipo_De_Token.intersect_Keyword:
+                    {
+                        IsOtherExpresion = true;
+                        Proximo_Token();
+                        Match(Tipo_De_Token.Parentesis_Abierto);
+                        var expresion_1 = Parse_Expresion();
+                        Match(Tipo_De_Token.coma);
+                        var expresion_2 = Parse_Expresion();
+                        Match(Tipo_De_Token.Parentesis_Cerrado);
+                        IsOtherExpresion = false;
+                        return new Generar_Inter(expresion_1, expresion_2);
                     }
                 case Tipo_De_Token.undefined_Keyword:
                 {
@@ -687,18 +729,6 @@ namespace GEOWALL_E
                         IsOtherExpresion = false;
                         return new Count(_expresion);
                     }
-                // Parseo de Interseccion
-                //case Tipo_De_Token.intersect_Keyword:
-                //    {
-                //        IsOtherExpresion = true;
-                //        Proximo_Token();
-                //        Match(Tipo_De_Token.Parentesis_Abierto);
-                //        var figura_1 = Parse_Expresion();
-                //        Match(Tipo_De_Token.coma);
-                //        var figura_2 = Parse_Expresion();
-                //        IsOtherExpresion = false;
-                //
-                //    }
 
                     //CAMBIO DE COLORES
                 case Tipo_De_Token.color_Keyword:

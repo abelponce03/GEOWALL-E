@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GEOWALL_E.Relacionado_con_hulk.Geometria.Secuencias;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E.Relacionado_con_hulk.Geometria
 {
-    class Secuencias<T> : Expresion
+   public class Secuencias<T> : Sequence
     {
         private Node<T> first;
         private Node<T> last;

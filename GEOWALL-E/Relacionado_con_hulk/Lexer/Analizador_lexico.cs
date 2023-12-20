@@ -1,4 +1,6 @@
+using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using System.ComponentModel.Design;
+using System.Globalization;
 
 namespace GEOWALL_E
 {
@@ -53,15 +55,22 @@ namespace GEOWALL_E
 
             if (char.IsDigit(charete))
             {
-                while (char.IsDigit(charete)) Siguiente();
+                int contador = 0;
+                while (char.IsDigit(charete) || charete is '.')
+                {
+                    if (charete is '.') contador++;
+                    if (contador > 1) throw new Exception($"");
+                    Siguiente();
+                }
                 int final = _posicion - inicio;
                 string fragmento = texto.Substring(inicio, final);
-                double.TryParse(fragmento, out var valor);
+                double valor;
+                double.TryParse(fragmento,NumberStyles.Any, CultureInfo.InvariantCulture, out valor);
                 return new Token(Tipo_De_Token.Numero, _posicion, fragmento, valor);
             }
             if (char.IsLetter(charete))
             {
-                while (char.IsLetter(charete)) Siguiente();
+                while (char.IsLetter(charete) || char.IsDigit(charete)) Siguiente();
                 int final = _posicion - inicio;
                 string fragmento = texto.Substring(inicio, final);
                 var tipo = Keyword.Tipo(fragmento);
@@ -100,6 +109,8 @@ namespace GEOWALL_E
                 case '\r': return new Token(Tipo_De_Token.salto_de_linea, _posicion++, "\r", null);
 
                 case '\n': return new Token(Tipo_De_Token.la_nada, _posicion++, "\n", null);
+
+                case '\t': return new Token(Tipo_De_Token.la_nada, _posicion++, "\t", null);
 
                 case '_' : return new Token(Tipo_De_Token.Identificador, _posicion++, "underscore", null);
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E.Relacionado_con_hulk.Geometria.Secuencias
 {
-    internal class Secuencia_Infinita<T> : Expresion
+    internal class Secuencia_Infinita<T> : Sequence
     {
         public override Tipo_De_Token Tipo => Tipo_De_Token.secuencia_infinita_Expresion;
 

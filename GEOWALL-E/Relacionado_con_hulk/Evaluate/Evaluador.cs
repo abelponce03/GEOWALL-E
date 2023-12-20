@@ -1,5 +1,6 @@
 using GEOWALL_E.Relacionado_con_hulk.AST;
 using GEOWALL_E.Relacionado_con_hulk.Colores;
+using GEOWALL_E.Relacionado_con_hulk.Declaraciones_de_figuras;
 using GEOWALL_E.Relacionado_con_hulk.Geometria;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Draw_Functions;
 using GEOWALL_E.Relacionado_con_hulk.Geometria.Intersections;
@@ -55,7 +56,7 @@ namespace GEOWALL_E
         object Evaluar_Expresion(Expresion nodo)
         {
             Contador++;
-            if (Contador > 1000)
+            if (Contador > 10000000000)
             {
                 throw new Exception("! OVERFLOW ERROR : Hulk Stack overflow");
             }
@@ -107,17 +108,17 @@ namespace GEOWALL_E
 
                 //------------------------------------------------//GEOMETRIA//------------------------------------------------------//
 
-                case Punto: return Evaluar_Expresion_Punto((Punto)nodo);
+                case Generacion_Punto: return Evaluar_Expresion_Punto((Generacion_Punto)nodo);
                 case Measure: return Evaluar_Expresion_Measure((Measure)nodo);
-                case Segment: return Evaluar_Expresion_Segment((Segment)nodo);
-                case Circle: return Evaluar_Expresion_Circle((Circle)nodo);
-                case Line: return Evaluar_Expresion_Line((Line)nodo);
-                case Ray: return Evaluar_Expresion_Ray((Ray)nodo);
-                case Arc: return Evaluar_Expresion_Arc((Arc)nodo);
+                case Generar_Segmento: return Evaluar_Expresion_Segment((Generar_Segmento)nodo);
+                case Generar_Circulo: return Evaluar_Expresion_Circle((Generar_Circulo)nodo);
+                case Generar_Linea: return Evaluar_Expresion_Line((Generar_Linea)nodo);
+                case Generar_Rayo: return Evaluar_Expresion_Ray((Generar_Rayo)nodo);
+                case Generar_Arco: return Evaluar_Expresion_Arc((Generar_Arco)nodo);
 
                 //----------------------------------------------// INTERSECCION //-----------------------------------------------------//
 
-                
+                case Generar_Inter: return Evaluar_Expresion_Intersect((Generar_Inter) nodo);
 
                 //------------------------------------------------// Dibujo //-----------------------------------------------------//
 
@@ -146,30 +147,48 @@ namespace GEOWALL_E
         }
         private static void Verificar_Asignacion_Identificadores(string a)
         {
-           if(a != "_" && Biblioteca.Variables.ContainsKey(a) ||
-              (Biblioteca.Pila.Count > 0) && Biblioteca.Pila.Peek().ContainsKey(a))  throw new Exception($"! SEMANTIC ERROR : Redefination of the constant <{a}>");
+           if(a != "_" && Biblioteca.Variables.ContainsKey(a) && Biblioteca.Pila.Count == 0)
+               throw new Exception($"! SEMANTIC ERROR : Redefination of the constant <{a}>");
         }
         private static void Guardar_En_Biblioteca_Variables(string a, object b)
         {
             if (Biblioteca.Pila.Count == 0 && a != "underscore") Biblioteca.Variables[a] = b;
+            else
+            {
+                if(a != "underscore") Biblioteca.Pila.Peek()[a] = b;
+            } 
         }
         private static bool Existencia(Literal a)
         {
             if(!Biblioteca.Variables.ContainsKey(a._Literal.Texto)) return false;
             return true;
         }
-        private static object Tomar_valor(Literal a) => Biblioteca.Variables[a._Literal.Texto];
-        
-        private object Evaluar_Literal(Literal a)
+        private static object Tomar_valor(Literal a)
+        {
+            if (Biblioteca.Pila.Count == 0) return Biblioteca.Variables[a._Literal.Texto];
+            else return Biblioteca.Pila.Peek()[a._Literal.Texto];
+        }
+
+            private object Evaluar_Literal(Literal a)
         {
             if (a._Literal.Tipo == Tipo_De_Token.Identificador)
             {
                 if (!Existencia(a) && Biblioteca.Pila.Count == 0) throw new Exception($"! SEMANTIC ERROR : Variable <{a._Literal.Texto}> is not defined");
-                else if (Biblioteca.Pila.Count != 0) return Biblioteca.Pila.Peek()[a._Literal.Texto];
                 return Tomar_valor(a);
             }
             return a.Valor;
         }
+
+        //////////////////////////////////////////INTERSECT//////////////////////////////////////////////////
+        public object Evaluar_Expresion_Intersect(Generar_Inter inter)
+        {
+            var a = Evaluar_Expresion(inter.Expresion_1);
+            var b = Evaluar_Expresion(inter.Expresion_2);
+            var x = Intersections.IntersectionBetween((ILugarGeometrico)a, (ILugarGeometrico)b);
+            return x;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         private object Evaluar_Expresion_Unaria(Expresion_Unaria c)
         {
             var right = Evaluar_Expresion(c.Right);
@@ -230,59 +249,34 @@ namespace GEOWALL_E
             var valor = Math.Cos((double)expresion);
             return valor;
         }
-        //evaluacion de let in mallllllllllll arreglar la pilaaaaaaa
+      
         private object Evaluar_Expresion_Let_in(Let_in g) 
         {
 
             var temp = new Dictionary<string, object>();
 
-            foreach(var check in g.Bloque)
-            {
-                if (check is Asignacion)
-                {
-                    Asignacion asignacion = (Asignacion)check;
-                    var valor = Evaluar_Expresion(check);
-                    temp.Add(asignacion.Identificador, valor);
-                }
-                else if (check is Punto)
-                {
-                    Punto _punto = (Punto)check;
-                    var valor = Evaluar_Expresion(check);
-                    temp.Add(_punto.Identificador, valor);
-                }
-                else if (check is Line)
-                {
-                    Line _Line = (Line)check;
-                    var valor = Evaluar_Expresion(_Line);
-                    temp.Add(_Line.Identificador, valor);
-                }
-                else if (check is Circle)
-                {
-                    Circle _circle = (Circle)check;
-                    var valor = Evaluar_Expresion(check);
-                    temp.Add(_circle.Identificador, valor);
-                }
-                else if (check is Ray)
-                {
-                    Ray _ray = (Ray)check;
-                    var valor = Evaluar_Expresion(check);
-                    temp.Add(_ray.Identificador, valor);
-                }
-                else if (check is Segment)
-                {
-                    Segment _segment = (Segment)check;
-                    var valor = Evaluar_Expresion(check);
-                    temp.Add(_segment.Identificador, valor);
-                }
-                else Evaluar_Expresion(check);
-            }
+            if (Biblioteca.Pila.Count != 0) Copiar_Valores_De_Pila_En_Diccionario_Temporal(temp);
+
+
             Biblioteca.Pila.Push(temp);
+
+            foreach (var check in g.Bloque)
+            {
+                Evaluar_Expresion(check);
+            }
 
             var _in = Evaluar_Expresion(g._IN);
 
             Biblioteca.Pila.Pop();
 
             return _in;
+        }
+        private void Copiar_Valores_De_Pila_En_Diccionario_Temporal(Dictionary<string, object> pila)
+        {
+            foreach(var x in Biblioteca.Pila.Peek())
+            {
+                pila.Add(x.Key, x.Value);
+            }
         }
         private object Evaluar_Expresion_Logaritmo(Logaritmo x)
         {
@@ -301,13 +295,21 @@ namespace GEOWALL_E
                 {
                     return Evaluar_Expresion(j._Else);
                 }
-                else throw new Exception("! SEMANTIC ERROR : If-ELSE expressions must have a boolean condition");
+                else return Evaluar_Expresion(j._expresion);
             }
-            else if (condicion is not undefined && (double) condicion != 0 && condicion.GetType() != typeof(bool)) throw new Exception("! SEMANTIC ERROR : If-ELSE expressions must have a boolean condition");
+            else if(condicion is Secuencia_Infinita<double>)
+            {
+                Secuencia_Infinita<double> secuencia = (Secuencia_Infinita<double>)condicion;
+                if( secuencia.Count == 0)
+                {
+                    return Evaluar_Expresion(j._Else);
 
-            else if (condicion is not undefined && (double) condicion != 0 && (bool)condicion) return Evaluar_Expresion(j._expresion);
+                }
+                else return Evaluar_Expresion(j._expresion);
+            }
+            else if (condicion is undefined ||  condicion is (double)0) return Evaluar_Expresion(j._Else);
 
-            else return Evaluar_Expresion(j._Else);
+            else return Evaluar_Expresion(j._expresion);
         }
         private object Evaluar_Expresion_Asignacion(Asignacion w)
         {
@@ -316,148 +318,39 @@ namespace GEOWALL_E
             Guardar_En_Biblioteca_Variables(w.Identificador, _expresion);
             return _expresion;
         }
+
+        #region EVALUAR ASIGNACION DE SECUENCIAS
         private object Evaluar_Expresion_Asignacion_Secuencia(Asignacion_Secuencia y)
         {
-            if (y._Secuencia is Literal)
+            //En caso de que sea un literal se busca en el diccionario y hay q verificar segun el tipo 
+            var _expresion = Evaluar_Expresion(y._Secuencia);
+            if(_expresion is Generar_Inter)
             {
-                Literal a = (Literal)y._Secuencia;
-
-                if (Tomar_valor(a) is undefined)
+                Secuencias<object> _secuencia = (Secuencias<object>)Evaluar_Expresion(y._Secuencia);
+                Secuencias<object> _resto = new Secuencias<object>();
+                int marcador = 0;
+                for (int i = 0; i < y.Identificadores.Count; i++)
                 {
-                    for (int i = 0; i < y.Identificadores.Count; i++)
+                    Verificar_Asignacion_Identificadores(y.Identificadores[i]);
+                    if (i >= _secuencia.Count)
                     {
-                        Verificar_Asignacion_Identificadores(y.Identificadores[i]);
                         Guardar_En_Biblioteca_Variables(y.Identificadores[i], new undefined());
-                    }
-                    Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                    Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, new Secuencias<object>());
-                }
-                //Secuencias numericas
-                else if (Tomar_valor(a) is Secuencia_Infinita<object>)
-                {
-                    Secuencia_Infinita<double> secuencia_infinita = (Secuencia_Infinita<double>)Biblioteca.Variables[a._Literal.Texto];
-
-                    Secuencia_Infinita<double> _resto = new Secuencia_Infinita<double>();
-
-                    double marcador = 0;
-
-                    for (int i = 0; i < y.Identificadores.Count; i++)
-                    {
-                        Verificar_Asignacion_Identificadores(y.Identificadores[i]);
-                        // caso {1 ...}
-                        if (secuencia_infinita.Count == 1)
-                        {
-                            Guardar_En_Biblioteca_Variables(y.Identificadores[i], secuencia_infinita[0] + i);
-                            marcador = secuencia_infinita[0] + i + 1;
-                        }
-                        // caso {a ... b}
-                        else
-                        {
-                            if ((secuencia_infinita[0] + i) > secuencia_infinita[secuencia_infinita.Count - 1])
-                            {
-                                Guardar_En_Biblioteca_Variables(y.Identificadores[i], new undefined());
-                                marcador = 0;
-                            }
-                            else
-                            {
-                                Guardar_En_Biblioteca_Variables(y.Identificadores[i], secuencia_infinita[0] + i);
-                                marcador = secuencia_infinita[0] + i + 1;
-                            }
-                        }
-                    }
-                    //case {1...} si habia cuatro constantes el resto seria {5...}
-                    if (secuencia_infinita.Count == 1)
-                    {
-                        _resto.Add(marcador);
-                        Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                        Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
-
                     }
                     else
                     {
-                        if (marcador == 0 || marcador >= secuencia_infinita[secuencia_infinita.Count - 1])
-                        {
-                            Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                            Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
-                        }
-                        else
-                        {
-                            _resto.Add(marcador);
-                            _resto.Add(secuencia_infinita[secuencia_infinita.Count - 1]);
-                            Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                            Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
-                        }
+                        Guardar_En_Biblioteca_Variables(y.Identificadores[i], _secuencia[i]);
+                        marcador++;
                     }
                 }
-                //caso para samples() y bueno despues points(f)
-                else if (Tomar_valor(a) is Secuencia_Infinita<Punto>)
+                for (int i = marcador; i < _secuencia.Count; i++)
                 {
-                    Secuencia_Infinita<Punto> secuencia = (Secuencia_Infinita<Punto>)Biblioteca.Variables[a._Literal.Texto];
-
-                    Secuencia_Infinita<Punto> _resto = new Secuencia_Infinita<Punto>();
-
-                    for (int i = 0; i < y.Identificadores.Count; i++)
-                    {
-                        Verificar_Asignacion_Identificadores(y.Identificadores[i]);
-                        if (i > secuencia.Count - 1) secuencia.Add(new Punto());
-                        Guardar_En_Biblioteca_Variables(y.Identificadores[i], secuencia[i]);
-                    }
-                    Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                    _resto.Add(new Punto());
-                    Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
+                    _resto.Add(_secuencia[i]);
                 }
-                //Secuencia infinita de valores entre 0 y 1
-                else if (Tomar_valor(a) is Randoms)
-                {
-                    Randoms randoms = (Randoms)Biblioteca.Variables[a._Literal.Texto];
-
-                    Secuencia_Infinita<double> secuencia = randoms.Infinita;
-
-                    Secuencia_Infinita<double> _resto = new Secuencia_Infinita<double>();
-
-                    Random random = new Random();
-
-                    for (int i = 0; i < y.Identificadores.Count; i++)
-                    {
-                        Verificar_Asignacion_Identificadores(y.Identificadores[i]);
-                        if (i > secuencia.Count - 1) secuencia.Add(random.NextDouble());
-                        Guardar_En_Biblioteca_Variables(y.Identificadores[i], secuencia[i]);
-                    }
-                    Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                    _resto.Add(random.NextDouble());
-                    Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
-                }
-                else
-                {
-                    Secuencias<object> _secuencia = (Secuencias<object>)Evaluar_Expresion(y._Secuencia);
-
-                    Secuencias<object> _resto = new Secuencias<object>();
-
-                    int marcador = 0;
-                    for (int i = 0; i < y.Identificadores.Count; i++)
-                    {
-                        Verificar_Asignacion_Identificadores(y.Identificadores[i]);
-                        if (i >= _secuencia.Count)
-                        {
-                            Guardar_En_Biblioteca_Variables(y.Identificadores[i], new undefined());
-                        }
-                        else
-                        {
-                            Guardar_En_Biblioteca_Variables(y.Identificadores[i], _secuencia[i]);
-                            marcador++;
-                        }
-                    }
-                    for (int i = marcador; i < _secuencia.Count; i++)
-                    {
-                        _resto.Add(_secuencia[i]);
-                    }
-                    //resto
-                    Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
-                    Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
-                }
-
+                //resto
+                Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
+                Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
             }
-            else if (y._Secuencia is undefined)
+            else if (_expresion is undefined)
             {
                 for (int i = 0; i < y.Identificadores.Count; i++)
                 {
@@ -468,7 +361,7 @@ namespace GEOWALL_E
                 Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, new Secuencias<object>());
             }
             //Secuencias numericas
-            else if (y._Secuencia is Secuencia_Infinita<Expresion>)
+            else if (_expresion is Secuencia_Infinita<Expresion>)
             {
                 Secuencia_Infinita<double> secuencia_infinita = (Secuencia_Infinita<double>)Evaluar_Expresion(y._Secuencia);
 
@@ -524,7 +417,7 @@ namespace GEOWALL_E
                 }
             }
             //caso para samples() y bueno despues points(f)
-            else if (y._Secuencia is Secuencia_Infinita<Punto>)
+            else if (_expresion is Secuencia_Infinita<Punto>)
             {
                 Secuencia_Infinita<Punto> _resto = new Secuencia_Infinita<Punto>();
 
@@ -537,7 +430,7 @@ namespace GEOWALL_E
                 Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
                 Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
             }
-            else if (y._Secuencia is Randoms)
+            else if (_expresion is Randoms)
             {
                 Secuencia_Infinita<double> _resto = new Secuencia_Infinita<double>();
 
@@ -552,7 +445,7 @@ namespace GEOWALL_E
                 Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
                 Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
             }
-            else if (y._Secuencia is Secuencias<object>)
+            else if (_expresion is Secuencias<object>)
             {
                 Secuencias<object> _secuencia = (Secuencias<object>)Evaluar_Expresion(y._Secuencia);
 
@@ -580,11 +473,11 @@ namespace GEOWALL_E
                 Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
                 Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
             }
-            else if(y._Secuencia is Expresion_Binaria)
+            else if(_expresion is Expresion_Binaria)
             {
-                var _expresion = Evaluar_Expresion(y._Secuencia);
+                var expresion = Evaluar_Expresion(y._Secuencia);
 
-                if (_expresion is undefined)
+                if (expresion is undefined)
                 {
                     for (int i = 0; i < y.Identificadores.Count; i++)
                     {
@@ -594,9 +487,9 @@ namespace GEOWALL_E
                     Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
                     Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, new Secuencias<object>());
                 }
-                else if (_expresion is Secuencias<object>)
+                else if (expresion is Secuencias<object>)
                 {
-                    Secuencias<object> _secuencia = (Secuencias<object>)_expresion;
+                    Secuencias<object> _secuencia = (Secuencias<object>)expresion;
 
                     Secuencias<object> _resto = new Secuencias<object>();
 
@@ -622,12 +515,14 @@ namespace GEOWALL_E
                     Verificar_Asignacion_Identificadores(y.Identificador_resto_de_secuencia);
                     Guardar_En_Biblioteca_Variables(y.Identificador_resto_de_secuencia, _resto);
                 }
-                else throw new Exception($"! SYNTAX ERROR : Cannot match this <{_expresion.GetType().Name}>");
+                else throw new Exception($"! SYNTAX ERROR : Cannot match this <{expresion.GetType().Name}>");
             }
             else throw new Exception($"! SYNTAX ERROR : Cannot match this <{y._Secuencia.GetType().Name}>");
 
             return null;
         }
+        #endregion
+
         private object Evaluar_Expresion_Secuencia(Secuencias<Expresion> z)
         {
             var _secuencia = new Secuencias<object>();
@@ -676,6 +571,8 @@ namespace GEOWALL_E
             }
             else throw new Exception($"! SEMANTIC ERROR : Count function cannot take this argument");
         }
+
+        #region  EVALUAR SECUENCIAS DE PUNTOS, LINEAS, CIRCULOS, RAYOS Y SEGMENTOS
         private object Evaluar_Expresion_Point_Sequence(Point_Sequence point_Sequence)
         {
             Guardar_En_Biblioteca_Variables(point_Sequence.Identificador, point_Sequence._Secuencias_Evaluada);
@@ -701,6 +598,11 @@ namespace GEOWALL_E
             Guardar_En_Biblioteca_Variables(segment_Sequence.Identificador, segment_Sequence._Secuencias_Evaluada);
             return null;
         }
+
+        #endregion
+
+        #region EVALUAR EXPRESIONES BINARIAS
+
         private object Evaluar_Expresion_Binaria(Expresion_Binaria b)
         {
             var left = Evaluar_Expresion(b.Left);
@@ -726,15 +628,9 @@ namespace GEOWALL_E
                     }
                 case Tipo_De_Token.Suma:
                     {
-                        if (left is Secuencias<object> && right is Secuencias<object>)
+                        if (left is Sequence && right is Sequence)
                         {
-                            Secuencias<object> secuencia_1 = (Secuencias<object>)left;
-                            Secuencias<object> secuencia_2 = (Secuencias<object>)right;
-                            for (int i = 0; i < secuencia_2.Count; i++)
-                            {
-                                secuencia_1.Add(secuencia_2[i]);
-                            }
-                            return secuencia_1;
+                            return Concatenacion_Secuencias.Concatenar((Sequence)left, (Sequence)right);
                         }
                         else if (left is undefined && right is Secuencias<object>)
                         {
@@ -768,7 +664,7 @@ namespace GEOWALL_E
                         {
                             Measure m1 = (Measure)left;
                             Measure m2 = (Measure)right;
-                            var valor = m1.Valor - m2.Valor;
+                            var valor = Math.Abs(m1.Valor - m2.Valor);
                             return new Measure(valor);
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
@@ -780,12 +676,20 @@ namespace GEOWALL_E
                         {
                             return (double)left * (double)right;
                         }
-                        else if (left is Measure && right is Measure)
+                        else if (left is double && right is Measure)
                         {
-                            Measure m1 = (Measure)left;
-                            Measure m2 = (Measure)right;
+                            double natural = (double)left;
+                            Measure m = (Measure)right;
                             
-                            var valor = m1.Valor * m2.Valor;
+                            var valor = natural * m.Valor;
+                            return new Measure(valor);
+                        }
+                        else if (left is Measure && right is double)
+                        {
+                            Measure m = (Measure)left;
+                            double natural = (double)right;
+
+                            var valor = natural * m.Valor;
                             return new Measure(valor);
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
@@ -820,27 +724,47 @@ namespace GEOWALL_E
 
                 case Tipo_De_Token.AmpersandAmpersand:
                     {
-                        if(left is bool && right is bool)
+                        if (left is 0 || right is 0) return 0;
+
+                        else if (left is undefined || right is undefined) return 0;
+
+                        else if (left is Secuencias<object>)
                         {
-                            return (bool)left && (bool)right;
+                            Secuencias<object> secuencia = (Secuencias<object>)left;
+                            if (secuencia.Count == 0) return 0;
+                            else return 1;
                         }
-                        else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
+                        else if (right is Secuencias<object>)
+                        {
+                            Secuencias<object> secuencia = (Secuencias<object>)right;
+                            if (secuencia.Count == 0) return 0;
+                            else return 1;
+                        }
+                        else return 1;
                     }
 
                 case Tipo_De_Token.PipePipe:
                     {
-                        if(left is bool && right is bool)
+                        if (left is 0 && right is 0) return 0;
+
+                        else if (left is undefined && right is undefined) return 0;
+
+                        else if (left is Secuencias<object> && right is Secuencias<object>)
                         {
-                            return (bool)left || (bool)right;
+                            Secuencias<object> secuencia_1 = (Secuencias<object>)left;
+                            Secuencias<object> secuencia_2 = (Secuencias<object>)right;
+                            if (secuencia_1.Count == 0 && secuencia_2.Count == 0) return 0;
+                            else return 1;
                         }
-                        else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
+                        else return 1;
                     }
 
                 case Tipo_De_Token.Menor_que:
                     {
                         if(left is double && right is double) 
                         {
-                            return (double)left < (double)right;
+                            if((double)left < (double)right) return (double) 1;
+                            return (double) 0;
                         }
                         else if (left is Measure && right is Measure)
                         {
@@ -848,9 +772,9 @@ namespace GEOWALL_E
                             Measure m2 = (Measure)right;
                             if (m1.Valor < m2.Valor)
                             {
-                                return true;
+                                return (double)1;
                             }
-                            else return false;
+                            else return (double)0;
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
                     }
@@ -858,7 +782,8 @@ namespace GEOWALL_E
                     {
                         if (left is double && right is double)
                         {
-                            return (double)left <= (double)right;
+                            if ((double)left <= (double)right) return (double)1;
+                            return (double)0;
                         }
                         else if (left is Measure && right is Measure)
                         {
@@ -866,9 +791,9 @@ namespace GEOWALL_E
                             Measure m2 = (Measure)right;
                             if (m1.Valor <= m2.Valor)
                             {
-                                return true;
+                                return (double)1;
                             }
-                            else return false;
+                            else return (double)0;
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
                     }
@@ -876,7 +801,8 @@ namespace GEOWALL_E
                     {
                         if (left is double && right is double)
                         {
-                            return (double)left > (double)right;
+                            if ((double)left > (double)right) return (double)1;
+                            return (double)0;
                         }
                         else if (left is Measure && right is Measure)
                         {
@@ -884,9 +810,9 @@ namespace GEOWALL_E
                             Measure m2 = (Measure)right;
                             if (m1.Valor > m2.Valor)
                             {
-                                return true;
+                                return (double)1;
                             }
-                            else return false;
+                            else return (double)0;
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
                     }
@@ -894,7 +820,8 @@ namespace GEOWALL_E
                     {
                         if (left is double && right is double)
                         {
-                            return (double)left >= (double)right;
+                            if ((double)left >= (double)right) return (double)1;
+                            return (double)0;
                         }
                         else if(left is Measure && right is Measure)
                         {
@@ -902,9 +829,9 @@ namespace GEOWALL_E
                             Measure m2 = (Measure)right;
                             if (m1.Valor >= m2.Valor)
                             {
-                                return true;
+                                return (double)1;
                             }
-                            else return false;
+                            else return (double)0;
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
                     }
@@ -916,13 +843,14 @@ namespace GEOWALL_E
                             Measure m2 = (Measure)right;
                             if (m1.Valor == m2.Valor)
                             {
-                                return true;
+                                return (double)1;
                             }
-                            else return false;
+                            else return (double)0;
                         }
                         else if(left is double && right is double)
                         {
-                            return Equals(left, right);
+                            if (Equals(left, right)) return (double)1;
+                            return (double)0;
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
                     }
@@ -934,24 +862,36 @@ namespace GEOWALL_E
                             Measure m2 = (Measure)right;
                             if (m1.Valor != m2.Valor)
                             {
-                                return true;
+                                return (double)1;
                             }
-                            else return false;
+                            else return (double)0;
                         }
                         else if( left is double && right is double)
                         {
-                            return !Equals(left, right);
+                            if (!Equals(left, right)) return (double)1;
+                            return (double)0;
                         }
                         else throw new Exception($"! SEMANTIC ERROR : Invalid expression: Can't operate <{left.GetType().Name}> with <{right.GetType().Name}> using <{b.Operador.Texto}>");
                     }
                 default: throw new Exception($"! SEMANTIC ERROR : Unexpected binary operator <{b.Operador.Tipo}>");
             }
         }
+        #endregion 
+
+
+
+
         ///////////////////////////////////////////////METODOS GEOMETRIA/////////////////////////////////////////////////////
-        
-        private object Evaluar_Expresion_Punto(Punto l)
+
+        private object Evaluar_Expresion_Punto(Generacion_Punto l)
         {
-            if (l.Componente_x is null && l.Componente_y is null) return l;
+            if (l.Componente_x is null && l.Componente_y is null)
+            {
+                Verificar_Asignacion_Identificadores(l.Identificador);
+                Punto punto = new Punto(); 
+                Guardar_En_Biblioteca_Variables(l.Identificador, punto);
+                return punto;
+            }
 
             var valor_x = Evaluar_Expresion(l.Componente_x);
             var valor_y = Evaluar_Expresion(l.Componente_y);
@@ -962,9 +902,9 @@ namespace GEOWALL_E
             if (l.Identificador is null) return new Punto(x1, y1);
 
             Verificar_Asignacion_Identificadores(l.Identificador);
-            Guardar_En_Biblioteca_Variables(l.Identificador, new Punto(l.Identificador, x1, y1));
+            Guardar_En_Biblioteca_Variables(l.Identificador, new Punto(x1, y1));
 
-            return new Punto(l.Identificador, x1, y1);
+            return new Punto(x1, y1);
         }
         private object Evaluar_Expresion_Measure(Measure o)
         {
@@ -990,8 +930,14 @@ namespace GEOWALL_E
                 throw new Exception($"! FUNCTION ERROR : Measure function takes two arguments points");
             }
         }
-        private object Evaluar_Expresion_Segment(Segment q)
-        {   
+        private object Evaluar_Expresion_Segment(Generar_Segmento q)
+        {   if(q.P1 is null && q.P2 is null)
+            {
+                Verificar_Asignacion_Identificadores(q.Identificador);
+                Segment _segment = new Segment( new Punto(), new Punto());
+                Guardar_En_Biblioteca_Variables(q.Identificador, _segment);
+                return _segment;
+            }
             var P1 = Evaluar_Expresion(q.P1);
             var P2 = Evaluar_Expresion(q.P2);
             if (P1 is Punto && P2 is Punto)
@@ -1007,8 +953,15 @@ namespace GEOWALL_E
             }
             throw new Exception($"! FUNCTION ERROR : Segment function takes two arguments points");
         }
-        private object Evaluar_Expresion_Circle(Circle r)
+        private object Evaluar_Expresion_Circle(Generar_Circulo r)
         {
+            if(r.Centro is null && r.Radio is null)
+            {
+                Verificar_Asignacion_Identificadores(r.Identificador);
+                Circle circulo = new Circle(r.Identificador);
+                Guardar_En_Biblioteca_Variables(r.Identificador, circulo);
+                return circulo;
+            }
              var centro = Evaluar_Expresion(r.Centro);
              var radio = Evaluar_Expresion(r.Radio);
              if(centro is Punto && radio is Measure)
@@ -1027,8 +980,15 @@ namespace GEOWALL_E
                 throw new Exception($"! FUNCTION ERROR : Circle function takes a point and an argument measure");
              }
         }
-        private object Evaluar_Expresion_Line(Line s)
+        private object Evaluar_Expresion_Line(Generar_Linea s)
         {
+            if(s.P1 is null && s.P2 is null)
+            {
+                Verificar_Asignacion_Identificadores(s.Identificador);
+                Line line = new Line(s.Identificador);
+                Guardar_En_Biblioteca_Variables(s.Identificador, line);
+                return line;
+            }
             var P1 = Evaluar_Expresion(s.P1);
             var P2 = Evaluar_Expresion(s.P2);
             if (P1 is Punto && P2 is Punto)
@@ -1047,8 +1007,15 @@ namespace GEOWALL_E
                 throw new Exception($"! FUNCTION ERROR : Line function takes two arguments points");
             }
         }
-        private object Evaluar_Expresion_Ray(Ray t)
+        private object Evaluar_Expresion_Ray(Generar_Rayo t)
         {
+            if(t.P1 is null &&  t.P2 is null)
+            {
+                Verificar_Asignacion_Identificadores(t.Identificador);
+                Ray _ray = new Ray(new Punto(), new Punto());
+                Guardar_En_Biblioteca_Variables(t.Identificador, _ray);
+                return _ray;
+            }
             var P1 = Evaluar_Expresion(t.P1);
             var P2 = Evaluar_Expresion(t.P2);
             if (P1 is Punto && P2 is Punto)
@@ -1067,8 +1034,16 @@ namespace GEOWALL_E
                 throw new Exception($"! FUNCTION ERROR : Ray function takes two arguments points");
             }
         }
-        private object Evaluar_Expresion_Arc(Arc v)
+        private object Evaluar_Expresion_Arc(Generar_Arco v)
         {
+            if(v.P1 is null && v.P2 is null && v.P3 is null && v._Measure is null)
+            {
+                Random random = new Random(); 
+                Verificar_Asignacion_Identificadores(v.Identificador);
+                Arc _arc = new Arc(new Punto(), new Punto(), new Punto(), new Measure(random.Next(0, 100)));
+                Guardar_En_Biblioteca_Variables(v.Identificador, _arc);
+                return _arc;
+            }
             var P1 = Evaluar_Expresion(v.P1);
             var P2 = Evaluar_Expresion(v.P2);
             var P3 = Evaluar_Expresion(v.P3);
@@ -1089,20 +1064,23 @@ namespace GEOWALL_E
                 throw new Exception($"! FUNCTION ERROR : Arc function takes three points and an argument measure");
             }
         }
-
-
-
-
-    private  object Evaluar_Expresion_Dibujar(Dibujar p)
+        #region DIBUJAR FIGURAS
+        private object Evaluar_Expresion_Dibujar(Dibujar p)
         {
-            Pen lapiz = new Pen(Colores.Peek(), 4);
+            Pen lapiz = new Pen(Colores.Peek(), 2);
 
-            switch (p._Expresion)
+            var a = Evaluar_Expresion(p._Expresion);
+
+            GEOWALL_E.Papel.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            switch (a)
             {
                 case Punto:
                     {
                         Punto _punto = (Punto)Evaluar_Expresion(p._Expresion);
                         Dibujar_Punto(_punto, lapiz);
+                        if (p.Etiqueta is not null) Crear_Etiqueta((int)_punto.valor_x,(int) _punto.valor_y, p.Etiqueta);
+
                         return null;
                     }
                 case Arc:
@@ -1135,7 +1113,7 @@ namespace GEOWALL_E
                         Dibujar_Segmento(_segment, lapiz);
                         return null;
                     }
-                case Secuencias<Expresion>:
+                case Secuencias<object>:
                     {
                         Secuencias<object> _secuencia = (Secuencias<object>)Evaluar_Expresion(p._Expresion);
                         for(int i = 0; i < _secuencia.Count; i++)
@@ -1172,272 +1150,98 @@ namespace GEOWALL_E
                     {
                         return null;
                     }
-                default:
-                    {
-                        Literal _literal = (Literal)p._Expresion;
-
-                        if (Biblioteca.Variables.ContainsKey(_literal._Literal.Texto))
-                        {
-                            var _expresion = Biblioteca.Variables[_literal._Literal.Texto];
-
-                            if (_expresion is Punto)
-                            {
-                                Punto _punto = (Punto)_expresion;
-                                Dibujar_Punto(_punto, lapiz);
-                            }
-                            else if (_expresion is Line)
-                            {
-                                Dibujar_Linea((Line)_expresion, lapiz);
-                            }
-                            else if (_expresion is Circle)
-                            {
-                                Dibujar_Circunsferencia((Circle)_expresion, lapiz);
-                            }
-                            else if (_expresion is Ray)
-                            {
-                                Dibujar_Rayo((Ray)_expresion, lapiz);
-                            }
-                            else if (_expresion is Secuencias<object>)
-                            {
-                                var _secuencia = (Secuencias<object>)_expresion;
-
-                                for (int i = 0; i < _secuencia.Count; i++)
-                                {
-                                    if (_secuencia[i] is Punto)
-                                    {
-                                        Dibujar_Punto((Punto)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Circle)
-                                    {
-                                        Dibujar_Circunsferencia((Circle)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Line)
-                                    {
-                                        Dibujar_Linea((Line)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Segment)
-                                    {
-                                        Dibujar_Segmento((Segment)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Arc)
-                                    {
-                                        Dibujar_Arco((Arc)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Ray)
-                                    {
-                                        Dibujar_Rayo((Ray)_secuencia[i], lapiz);
-                                    }
-                                    else throw new Exception($"! SEMANTIC ERROR : <{_expresion.GetType().Name}> cannot be draw");
-                                }
-                            }
-                            else if (_expresion is Segment)
-                            {
-                                Dibujar_Segmento((Segment)_expresion, lapiz);
-                            }
-                            else if (_expresion is Arc)
-                            {
-                                Dibujar_Arco((Arc)_expresion, lapiz);
-                            }
-                            else if(_expresion is Secuencia_Infinita<Punto>)
-                            {
-                                while(true)
-                                {
-                                    Dibujar_Punto(new Punto(), lapiz);
-                                }
-                            }
-                            else if(_expresion is undefined)
-                            {
-
-                            }
-                            else throw new Exception($"! SEMANTIC ERROR : This expression cannot be draw");
-
-                            return null;
-                        }
-                        else if(Biblioteca.Pila.Count > 0 && Biblioteca.Pila.Peek().ContainsKey(_literal._Literal.Texto))
-                        {
-                            var _expresion = Biblioteca.Pila.Peek()[_literal._Literal.Texto];
-
-                            if (_expresion is Punto)
-                            {
-                                Dibujar_Punto((Punto)_expresion, lapiz);
-                            }
-                            else if (_expresion is Line)
-                            {
-                                Dibujar_Linea((Line)_expresion, lapiz);
-                            }
-                            else if (_expresion is Circle)
-                            {
-                                Dibujar_Circunsferencia((Circle)_expresion, lapiz);
-                            }
-                            else if (_expresion is Ray)
-                            {
-                                Dibujar_Rayo((Ray)_expresion, lapiz);
-                            }
-                            else if (_expresion is Secuencias<object>)
-                            {
-                                var _secuencia = (Secuencias<object>)_expresion;
-
-                                for (int i = 0; i < _secuencia.Count; i++)
-                                {
-                                    if (_secuencia[i] is Punto)
-                                    {
-                                        Dibujar_Punto((Punto)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Circle)
-                                    {
-                                        Dibujar_Circunsferencia((Circle)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Line)
-                                    {
-                                        Dibujar_Linea((Line)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Segment)
-                                    {
-                                        Dibujar_Segmento((Segment)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Arc)
-                                    {
-                                        Dibujar_Arco((Arc)_secuencia[i], lapiz);
-                                    }
-                                    else if (_secuencia[i] is Ray)
-                                    {
-                                        Dibujar_Rayo((Ray)_secuencia[i], lapiz);
-                                    }
-                                    else throw new Exception($"! SEMANTIC ERROR : <{_secuencia[i].GetType().Name}> cannot be draw");
-                                }
-                            }
-                            else if(_expresion is Segment)
-                            {
-                                Dibujar_Segmento((Segment)_expresion, lapiz);
-                            }
-                            else if (_expresion is Arc)
-                            {
-                                Dibujar_Arco((Arc)_expresion, lapiz);
-                            }
-                            else if (_expresion is Secuencia_Infinita<Punto>)
-                            {
-                                while (true)
-                                {
-                                    Dibujar_Punto(new Punto(), lapiz);
-                                }
-                            }
-                            else if (_expresion is undefined)
-                            {
-
-                            }
-                            else throw new Exception($"! SEMANTIC ERROR : <{_expresion.GetType().Name}> cannot be draw");
-
-                            return null;
-                        }
-                        else
-                        {
-                            throw new Exception($"! SEMANTIC ERROR : <{p._Expresion.GetType().Name}> cannot be draw");
-                        }
-                    }
+                default: throw new Exception($"! SEMANTIC ERROR : <{p._Expresion.GetType().Name}> cannot be draw");
             }
 
         }
-        private Label Crear_Etiqueta(Point location, string identificador)
-        {
-            Label etiqueta = new Label
-            {
-                Parent = GEOWALL_E.PANEL_DIBUJO,
-                AutoSize = true,
-                BackColor = Color.Transparent,
-                Text = identificador,
-                Location = location,
-                ForeColor = Color.Black,
-            };
+        #endregion 
 
+        private void Crear_Etiqueta(int valor_x, int valor_y, string identificador)
+        {
+            Font drawFont = new Font("Arial", 10);
+            SolidBrush drawBrush = new SolidBrush(Color.Black);
+
+            Point location = new Point(valor_x, valor_y);
             //visualizar etiqueta
-            GEOWALL_E.PANEL_DIBUJO.Controls.Add(etiqueta);
-            
-            return etiqueta;
+            GEOWALL_E.Papel.DrawString(identificador, drawFont, drawBrush, location);
         }
 
         private void Dibujar_Punto(Punto _punto, Pen lapiz)
         {
-            int x1 = Convert.ToInt32(_punto.valor_x);
-            int y1 = Convert.ToInt32(_punto.valor_y);
+           PointF punto= new PointF((float)_punto.valor_x,(float)_punto.valor_y);
 
-            GEOWALL_E.Papel.DrawEllipse(lapiz, x1 - 2, y1 - 2, 4, 4);
+            GEOWALL_E.Papel.DrawEllipse(lapiz, punto.X - 1, punto.Y, 2, 2);
         }
         private void Dibujar_Circunsferencia(Circle _circle, Pen lapiz)
         {
             Punto centro = (Punto)_circle.Centro;
             Measure radio = (Measure)_circle.Radio;
 
-            int x1 = Convert.ToInt32(centro.valor_x);
-            int y1 = Convert.ToInt32(centro.valor_y);
-            int measure = Convert.ToInt32(radio.Valor);
+            PointF punto = new PointF((float)centro.valor_x, (float)centro.valor_y);
+            float measure = (float) radio.Valor;
 
-            GEOWALL_E.Papel.DrawEllipse(lapiz, x1 - measure, y1 - measure, measure * 2, measure * 2);
+            GEOWALL_E.Papel.DrawEllipse(lapiz, punto.X - measure, punto.Y - measure, measure * 2, measure * 2);
         }
         private void Dibujar_Segmento(Segment _segment, Pen lapiz)
         {
             Punto P1 = (Punto)_segment.P1;
             Punto P2 = (Punto)_segment.P2;
 
-            int x1 = Convert.ToInt32(P1.valor_x);
-            int y1 = Convert.ToInt32(P1.valor_y);
-            int x2 = Convert.ToInt32(P2.valor_x);
-            int y2 = Convert.ToInt32(P2.valor_y);
+            PointF punto_1 = new PointF((float)P1.valor_x, (float)P1.valor_y);
+            PointF punto_2 = new PointF((float)P2.valor_x, (float)P2.valor_y);
 
-            GEOWALL_E.Papel.DrawLine(lapiz, x1, y1, x2, y2);
+            GEOWALL_E.Papel.DrawLine(lapiz, punto_1.X, punto_1.Y, punto_2.X, punto_2.Y);
         }
         private void Dibujar_Linea(Line _line, Pen lapiz)
         {
             Punto p1 = (Punto)_line.P1;
             Punto p2 = (Punto)_line.P2;
 
-            double x1 = Convert.ToInt32(p1.valor_x);
-            double y1 = Convert.ToInt32(p1.valor_y);
-            double x2 = Convert.ToInt32(p2.valor_x);
-            double y2 = Convert.ToInt32(p2.valor_y);
+            PointF punto_1 = new PointF((float)p1.valor_x, (float)p1.valor_y);
+            PointF punto_2 = new PointF((float)p2.valor_x, (float)p2.valor_y);
 
-            double pendiente = (y2 - y1) / (x2 - x1);
-            double _n = y1 - pendiente * x1;
+            float pendiente = (punto_2.Y - punto_1.Y) / (punto_2.X - punto_1.X);
+            float _n = punto_1.Y - pendiente * punto_1.X;
 
-            double Yfinal = pendiente * 10000 + _n;
+            float Yfinal = pendiente * 10000 + _n;
 
-            GEOWALL_E.Papel.DrawLine(lapiz, 0, (int)_n, 10000, (int)Yfinal);
+            GEOWALL_E.Papel.DrawLine(lapiz, 0, _n, 10000, Yfinal);
         }
         private void Dibujar_Rayo(Ray _ray, Pen lapiz) 
         {
             Punto p1 = (Punto)_ray.P1;
             Punto p2 = (Punto)_ray.P2;
 
-            double x1 = Convert.ToInt32(p1.valor_x);
-            double y1 = Convert.ToInt32(p1.valor_y);
-            double x2 = Convert.ToInt32(p2.valor_x);
-            double y2 = Convert.ToInt32(p2.valor_y);
+            PointF punto_1 = new PointF((float)p1.valor_x, (float)p1.valor_y);
+            PointF punto_2 = new PointF((float)p2.valor_x, (float)p2.valor_y);
 
-            double pendiente = (y2 - y1) / (x2 - x1);
 
-            double _n = y2 - pendiente * x2;
+            float pendiente = (punto_2.Y - punto_1.Y) / (punto_2.X - punto_1.X);
+            float _n = punto_1.Y - pendiente * punto_1.X;
 
-            if(x2 == x1 && y2 == y1)
+
+            if (punto_2.X == punto_1.X && punto_2.Y == punto_1.Y)
             {
 
             }
-            else if(x2 == x1 && y2 > y1) 
+            else if(punto_2.X == punto_1.X && punto_2.Y > punto_1.Y) 
             {
-                GEOWALL_E.Papel.DrawLine(lapiz, (int)x1, (int)y1, (int)x1, 10000);
+                GEOWALL_E.Papel.DrawLine(lapiz, punto_1.X, punto_1.Y, punto_1.X, 10000);
             }
-            else if(x2 == x1 && y2 < y1)
+            else if(punto_2.X == punto_1.X && punto_2.Y < punto_1.Y)
             {
-                GEOWALL_E.Papel.DrawLine(lapiz, (int)x1, (int)y1, (int)x1, -10000);
+                GEOWALL_E.Papel.DrawLine(lapiz, punto_1.X, punto_1.Y, punto_1.X, -10000);
             }
-            else if(x2 > x1)
+            else if(punto_2.X > punto_1.X)
             {
-                double Yfinal1 = pendiente * 10000 + _n;
+                float Yfinal1 = pendiente * 10000 + _n;
 
-                GEOWALL_E.Papel.DrawLine(lapiz, (int)x1, (int)y1, 10000, (int)Yfinal1);
+                GEOWALL_E.Papel.DrawLine(lapiz, punto_1.X, punto_1.Y, 10000, Yfinal1);
             }
             else 
             {
-                double Yfinal = pendiente * -10000 + _n;
-                GEOWALL_E.Papel.DrawLine(lapiz, (int)x1, (int)y1, -10000, (int)Yfinal);
+                float Yfinal = pendiente * -10000 + _n;
+                GEOWALL_E.Papel.DrawLine(lapiz, punto_1.X, punto_1.Y, -10000, Yfinal);
             }
         }
 
@@ -1451,13 +1255,43 @@ namespace GEOWALL_E
 
             //Tangente
 
-            double M1 = (P2.valor_y - P1.valor_y) / (P2.valor_x - P1.valor_x);
-            double angulo_final = Math.Atan(M1) * 180 / Math.PI;
+            double diferencial_y_M1 = P2.valor_y - P1.valor_y;
+            double diferencial_x_M1 = P2.valor_x - P1.valor_x;
+            
 
-            double M2 = (P3.valor_y - P1.valor_y) / (P3.valor_x - P1.valor_x);
-            double angulo_inicial = Math.Atan(M2) * 180 / Math.PI;
+            double M1 = diferencial_y_M1 / diferencial_x_M1;
 
-            double angulo_entre_tangentes = Math.Atan((M2 - M1) / 1 + M2 * M1) * 180 / Math.PI;
+            double angulo_final;
+
+            if(diferencial_y_M1 < 0 && diferencial_x_M1 > 0) 
+            {
+                angulo_final =(Math.Atan(M1) + 2*Math.PI) * 180 / Math.PI;
+            }
+            else if(diferencial_y_M1 > 0 && diferencial_x_M1 < 0)
+            {
+                angulo_final = (Math.Atan(M1) + Math.PI) * 180 / Math.PI;
+            }
+            else angulo_final = Math.Atan(M1) * 180 / Math.PI;
+
+
+            double diferencial_y_M2 = P3.valor_y - P1.valor_y;
+            double diferencial_x_M2 = P3.valor_x - P1.valor_x;
+
+            double M2 = diferencial_y_M2 / diferencial_x_M2;
+
+            double angulo_inicial;
+
+            if (diferencial_y_M2 < 0 && diferencial_x_M2 > 0)
+            {
+                angulo_inicial = (Math.Atan(M2) + 2*Math.PI) * 180 / Math.PI;
+            }
+            else if (diferencial_y_M2 > 0 && diferencial_x_M2 < 0)
+            {
+                angulo_inicial = (Math.Atan(M2) + Math.PI) * 180 / Math.PI;
+            }
+            else angulo_inicial = Math.Atan(M2) * 180 / Math.PI;
+
+            // double angulo_entre_tangentes = Math.Atan((M2 - M1) / 1 + M2 * M1) * 180 / Math.PI;
 
             double diferencia = angulo_final - angulo_inicial;
 
@@ -1470,9 +1304,9 @@ namespace GEOWALL_E
 
             //Prueba arcos
 
-            //point p(600, 400);
-            //point a(700, 300);
-            //point q(600, 700);
+            //point p;
+            //point a;
+            //point q;
             //color blue;
             //draw ray(p, a);
             //draw ray(p, q);

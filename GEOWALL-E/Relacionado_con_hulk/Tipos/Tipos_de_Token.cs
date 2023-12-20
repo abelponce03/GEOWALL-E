@@ -1,7 +1,7 @@
 namespace GEOWALL_E
 {
     // Esta es la clase que le va a dar las propiedades al token
-    enum Tipo_De_Token
+  public  enum Tipo_De_Token
     {
         //tokens
         Numero,
@@ -124,6 +124,14 @@ namespace GEOWALL_E
 
         restore_Keyword,
         restore_Expresion,
+
+        //GENERACION
+        generacion_puntos_Expresion,
+        generacion_lineas_Expresion,
+        generacion_circulos_Expresion,
+        generacion_segmentos_Expresion,
+        generacion_rayos_Expresion,
+        generacion_arcos_Expresion,
     }
 }
 

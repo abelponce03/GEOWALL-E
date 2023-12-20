@@ -1,6 +1,6 @@
 namespace GEOWALL_E
 {
-    abstract class Expresion : Nodo
+   public abstract class Expresion : Nodo
     {
 
     }

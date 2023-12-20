@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GEOWALL_E.Relacionado_con_hulk.Geometria.Secuencias;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GEOWALL_E.Relacionado_con_hulk.Geometria
 {
-    internal class Line_Sequence : Expresion
+    internal class Line_Sequence : Sequence
     {
         public override Tipo_De_Token Tipo => Tipo_De_Token.line_sequence_Expresion;
 

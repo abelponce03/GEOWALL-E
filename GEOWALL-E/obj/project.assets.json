@@ -15,11 +15,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\abelp\\OneDrive\\Desktop\\Clon_GEOWALL-E\\GEOWALL-E\\GEOWALL-E.csproj",
+      "projectUniqueName": "C:\\Users\\abelp\\OneDrive\\Documents\\GitHub\\GEOWALL-E\\GEOWALL-E\\GEOWALL-E.csproj",
       "projectName": "GEOWALL-E",
-      "projectPath": "C:\\Users\\abelp\\OneDrive\\Desktop\\Clon_GEOWALL-E\\GEOWALL-E\\GEOWALL-E.csproj",
+      "projectPath": "C:\\Users\\abelp\\OneDrive\\Documents\\GitHub\\GEOWALL-E\\GEOWALL-E\\GEOWALL-E.csproj",
       "packagesPath": "C:\\Users\\abelp\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\abelp\\OneDrive\\Desktop\\Clon_GEOWALL-E\\GEOWALL-E\\obj\\",
+      "outputPath": "C:\\Users\\abelp\\OneDrive\\Documents\\GitHub\\GEOWALL-E\\GEOWALL-E\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

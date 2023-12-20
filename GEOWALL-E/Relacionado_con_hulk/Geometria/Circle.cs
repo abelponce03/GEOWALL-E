@@ -22,7 +22,7 @@ namespace GEOWALL_E
         {
             Identificador = identificador;
             Random rd = new Random();
-            double radio = rd.Next(0, 400);
+            double radio = rd.Next(0, 100);
 
             Punto _punto = new Punto();
 

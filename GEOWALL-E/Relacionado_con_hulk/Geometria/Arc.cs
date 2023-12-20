@@ -15,7 +15,7 @@ namespace GEOWALL_E
             P1 = new Punto();
             P2 = new Punto();
             P3 = new Punto();
-            _Measure = new Measure(random.Next(0, 400));
+            _Measure = new Measure(random.Next(0, 100));
         }
         public Arc(Punto p1, Punto p2, Punto p3, Measure measure)
         {
